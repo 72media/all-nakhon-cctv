@@ -1258,28 +1258,20 @@ window.openLightbox = function (uid) {
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
     const info = document.getElementById('lightbox-info');
-    lbImg.src = img.src;
+
+    // ★ ใส่ cache buster ใหม่ทุกครั้ง เพื่อบังคับให้ browser ดึงภาพสด
+    const baseSrc = img.src.split('?')[0];
+    lbImg.src = baseSrc + '?_t=' + Date.now();
+
     const camName = img.alt || '';
     const now = new Date().toLocaleString('th-TH', {
         day: 'numeric', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
     });
-    info.innerHTML = `<span><i class="fas fa-camera"></i> ${camName}</span> <span class="lb-time"><i class="fas fa-clock"></i> ${now} น.</span>`;
+    info.innerHTML = `<span><i class="fas fa-camera"></i> ${camName}</span> <span class="lb-time"><i class="fas fa-clock"></i> เปิดเมื่อ ${now} น.</span>`;
     lb.classList.add('show');
     document.body.style.overflow = 'hidden';
 };
-
-window.closeLightbox = function () {
-    const lb = document.getElementById('lightbox');
-    if (!lb.classList.contains('show')) return;
-    lb.classList.remove('show');
-    document.body.style.overflow = '';
-    setTimeout(() => {
-        const lbImg = document.getElementById('lightbox-img');
-        if (lbImg) lbImg.src = '';
-    }, 300);
-};
-
 // กด ESC เพื่อปิด lightbox
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeLightbox();
