@@ -15,7 +15,6 @@
 * { font-family: 'Kanit', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
 body { overflow: hidden; background: #0b1120; }
 #map { height: 100vh; width: 100%; z-index: 1; }
-
 .test-sidebar {
     position: absolute; top: 12px; left: 12px;
     width: 340px;
@@ -25,67 +24,36 @@ body { overflow: hidden; background: #0b1120; }
     border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
     display: flex; flex-direction: column; overflow: hidden;
     box-shadow: 0 20px 40px rgba(0,0,0,0.55);
-    transition: transform .35s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity .25s ease,
-                max-height .3s ease;
-    transform: translateX(0);
-    opacity: 1;
+    transition: transform .35s cubic-bezier(0.16, 1, 0.3, 1), opacity .25s ease, max-height .3s ease;
+    transform: translateX(0); opacity: 1;
 }
-
-.test-sidebar.collapsed {
-    transform: translateX(-380px);
-    opacity: 0;
-    pointer-events: none;
-}
-
+.test-sidebar.collapsed { transform: translateX(-380px); opacity: 0; pointer-events: none; }
 .sidebar-reveal-btn {
-    position: absolute; top: 12px; left: 12px;
-    z-index: 899;
+    position: absolute; top: 12px; left: 12px; z-index: 899;
     width: 46px; height: 46px;
     background: linear-gradient(135deg, rgba(243,156,18,0.95), rgba(230,126,34,0.9));
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 12px;
-    color: #fff; font-size: 1.1rem;
-    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.3); border-radius: 12px;
+    color: #fff; font-size: 1.1rem; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 8px 24px rgba(243,156,18,0.45);
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    transform: translateX(-60px);
-    pointer-events: none;
-    transition: opacity .25s ease,
-                transform .35s cubic-bezier(0.16, 1, 0.3, 1),
-                background .2s,
-                box-shadow .2s;
+    backdrop-filter: blur(10px); opacity: 0; transform: translateX(-60px); pointer-events: none;
+    transition: opacity .25s ease, transform .35s cubic-bezier(0.16, 1, 0.3, 1), background .2s, box-shadow .2s;
 }
-.sidebar-reveal-btn.show {
-    opacity: 1;
-    transform: translateX(0);
-    pointer-events: auto;
-}
-.sidebar-reveal-btn:hover {
-    background: linear-gradient(135deg, #f59e0b, #ea580c);
-    box-shadow: 0 10px 30px rgba(243,156,18,0.65);
-    transform: translateX(0) scale(1.06);
-}
+.sidebar-reveal-btn.show { opacity: 1; transform: translateX(0); pointer-events: auto; }
+.sidebar-reveal-btn:hover { background: linear-gradient(135deg, #f59e0b, #ea580c); transform: translateX(0) scale(1.06); }
 .sidebar-reveal-btn .reveal-tooltip {
-    position: absolute; top: 50%; left: calc(100% + 10px);
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.92); color: #fff;
-    font-size: .72rem; font-weight: 600;
-    padding: 5px 10px; border-radius: 6px;
-    white-space: nowrap; opacity: 0; pointer-events: none;
-    transition: opacity .18s;
-    border: 1px solid rgba(255,255,255,0.1);
+    position: absolute; top: 50%; left: calc(100% + 10px); transform: translateY(-50%);
+    background: rgba(0,0,0,0.92); color: #fff; font-size: .72rem; font-weight: 600;
+    padding: 5px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none;
+    transition: opacity .18s; border: 1px solid rgba(255,255,255,0.1);
 }
 .sidebar-reveal-btn:hover .reveal-tooltip { opacity: 1; }
-
 .thai-datetime-card {
     padding: 14px 16px;
     background: linear-gradient(135deg, rgba(243,156,18,0.22), rgba(230,126,34,0.12));
     border-bottom: 1px solid rgba(243,156,18,0.28);
-    display: flex; flex-direction: column; gap: 5px;
-    flex-shrink: 0; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; gap: 5px; flex-shrink: 0;
+    position: relative; overflow: hidden;
 }
 .thai-datetime-card::before {
     content: ''; position: absolute; top: -50%; right: -30%;
@@ -95,181 +63,94 @@ body { overflow: hidden; background: #0b1120; }
 }
 .thai-datetime-card .dt-day {
     display: flex; align-items: center; gap: 8px;
-    color: #fcd34d; font-size: .78rem; font-weight: 500;
-    position: relative; z-index: 1;
+    color: #fcd34d; font-size: .78rem; font-weight: 500; position: relative; z-index: 1;
 }
 .thai-datetime-card .dt-day i { color: #f59e0b; font-size: .82rem; }
 .thai-datetime-card .dt-time {
     display: flex; align-items: center; gap: 10px;
     color: #fff; font-size: 1.45rem; font-weight: 700;
     font-family: 'Courier New', monospace; letter-spacing: 1.5px;
-    text-shadow: 0 0 14px rgba(243,156,18,0.45);
-    position: relative; z-index: 1;
+    text-shadow: 0 0 14px rgba(243,156,18,0.45); position: relative; z-index: 1;
 }
 .thai-datetime-card .dt-time i { color: #f59e0b; font-size: 1.05rem; }
-
 .thaiwater-btn {
-    position: absolute; top: 12px; right: 56px;
-    z-index: 2;
+    position: absolute; top: 12px; right: 56px; z-index: 2;
     width: 42px; height: 42px;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    transition: all .2s ease;
-    backdrop-filter: blur(6px);
-    text-decoration: none;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .2s ease; backdrop-filter: blur(6px); text-decoration: none;
 }
-.thaiwater-btn:hover {
-    background: rgba(255,255,255,0.22);
-    transform: scale(1.08);
-    box-shadow: 0 4px 15px rgba(243,156,18,0.4);
-}
-.thaiwater-btn img {
-    width: 30px; height: 30px;
-    object-fit: contain;
-    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
-}
+.thaiwater-btn:hover { background: rgba(255,255,255,0.22); transform: scale(1.08); box-shadow: 0 4px 15px rgba(243,156,18,0.4); }
+.thaiwater-btn img { width: 30px; height: 30px; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4)); }
 .thaiwater-btn .tw-tooltip {
-    position: absolute; bottom: -32px; right: 0;
-    background: rgba(0,0,0,0.92);
-    color: #fff; font-size: .68rem; font-weight: 600;
-    padding: 4px 10px; border-radius: 6px;
-    white-space: nowrap; opacity: 0; pointer-events: none;
-    transition: opacity .18s;
+    position: absolute; bottom: -32px; right: 0; background: rgba(0,0,0,0.92);
+    color: #fff; font-size: .68rem; font-weight: 600; padding: 4px 10px; border-radius: 6px;
+    white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .18s;
     border: 1px solid rgba(255,255,255,0.1);
 }
 .thaiwater-btn:hover .tw-tooltip { opacity: 1; }
-
 .sidebar-collapse-btn {
-    position: absolute; top: 12px; right: 12px;
-    z-index: 3;
-    width: 42px; height: 42px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 10px;
-    color: #fff; font-size: .95rem;
-    cursor: pointer;
+    position: absolute; top: 12px; right: 12px; z-index: 3;
+    width: 42px; height: 42px; background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 10px;
+    color: #fff; font-size: .95rem; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    transition: all .2s;
-    backdrop-filter: blur(6px);
+    transition: all .2s; backdrop-filter: blur(6px);
 }
-.sidebar-collapse-btn:hover {
-    background: rgba(0,0,0,0.7);
-    transform: scale(1.08);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-}
+.sidebar-collapse-btn:hover { background: rgba(0,0,0,0.7); transform: scale(1.08); }
 .sidebar-collapse-btn .collapse-tooltip {
-    position: absolute; top: 50%; right: calc(100% + 10px);
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.92); color: #fff;
-    font-size: .68rem; font-weight: 600;
-    padding: 4px 10px; border-radius: 6px;
-    white-space: nowrap; opacity: 0; pointer-events: none;
-    transition: opacity .18s;
-    border: 1px solid rgba(255,255,255,0.1);
+    position: absolute; top: 50%; right: calc(100% + 10px); transform: translateY(-50%);
+    background: rgba(0,0,0,0.92); color: #fff; font-size: .68rem; font-weight: 600;
+    padding: 4px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none;
+    transition: opacity .18s; border: 1px solid rgba(255,255,255,0.1);
 }
 .sidebar-collapse-btn:hover .collapse-tooltip { opacity: 1; }
-
-.sidebar-head {
-    padding: 10px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.02);
-    flex-shrink: 0;
-}
+.sidebar-head { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); flex-shrink: 0; }
 .sidebar-head input {
-    width: 100%; padding: 8px 12px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    color: #fff; outline: none; font-size: .82rem;
-    transition: border-color .2s;
+    width: 100%; padding: 8px 12px; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 10px;
+    color: #fff; outline: none; font-size: .82rem; transition: border-color .2s;
 }
 .sidebar-head input:focus { border-color: #6366f1; }
 .sidebar-head input::placeholder { color: #64748b; }
-
-.sidebar-section {
-    display: flex; flex-direction: column;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    overflow: hidden; flex-shrink: 0;
-}
+.sidebar-section { display: flex; flex-direction: column; border-bottom: 1px solid rgba(255,255,255,0.08); overflow: hidden; flex-shrink: 0; }
 .sidebar-section.grow { min-height: 0; }
 .sidebar-section .section-head {
     display: flex; align-items: center; justify-content: space-between;
     padding: 9px 14px; background: rgba(255,255,255,0.04);
-    border: 0; color: #cbd5e1;
-    font-size: .74rem; font-weight: 600;
+    border: 0; color: #cbd5e1; font-size: .74rem; font-weight: 600;
     cursor: pointer; font-family: inherit; text-align: left;
     transition: background .15s; flex-shrink: 0;
 }
 .sidebar-section .section-head:hover { background: rgba(99,102,241,0.18); color: #fff; }
 .sidebar-section .section-head span { display: flex; align-items: center; gap: 7px; }
-.sidebar-section .section-head .section-arrow {
-    transition: transform .25s; font-size: .6rem; opacity: .65;
-}
+.sidebar-section .section-head .section-arrow { transition: transform .25s; font-size: .6rem; opacity: .65; }
 .sidebar-section.collapsed .section-arrow { transform: rotate(-90deg); }
-
-.section-body {
-    overflow-y: auto;
-    transition: max-height .3s ease, opacity .2s ease;
-    max-height: 2000px; opacity: 1;
-}
-.sidebar-section.collapsed .section-body {
-    max-height: 0 !important; opacity: 0; overflow: hidden;
-}
-#section-camlist .section-body {
-    max-height: calc(100vh - 380px);
-    min-height: 0;
-    overflow-y: auto;
-}
+.section-body { overflow-y: auto; transition: max-height .3s ease, opacity .2s ease; max-height: 2000px; opacity: 1; }
+.sidebar-section.collapsed .section-body { max-height: 0 !important; opacity: 0; overflow: hidden; }
+#section-camlist .section-body { max-height: calc(100vh - 380px); min-height: 0; overflow-y: auto; }
 .section-body::-webkit-scrollbar { width: 5px; }
 .section-body::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
 .section-body::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 10px; }
-
-.legend-list {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
-    padding: 8px 12px 10px;
-}
+.legend-list { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 8px 12px 10px; }
 .legend-item {
-    display: flex; align-items: center; gap: 6px;
-    font-size: .68rem; color: #cbd5e1; cursor: pointer;
-    padding: 4px 6px; border-radius: 6px;
-    transition: background .15s;
+    display: flex; align-items: center; gap: 6px; font-size: .68rem; color: #cbd5e1;
+    cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: background .15s;
 }
 .legend-item:hover { background: rgba(255,255,255,0.08); }
 .legend-item.off { opacity: 0.35; }
-.legend-dot {
-    width: 9px; height: 9px; border-radius: 50%;
-    border: 1.5px solid #fff; flex-shrink: 0;
-}
-.legend-item .cnt {
-    margin-left: auto; color: #64748b;
-    font-size: .6rem; font-family: 'Courier New', monospace;
-}
-
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid #fff; flex-shrink: 0; }
+.legend-item .cnt { margin-left: auto; color: #64748b; font-size: .6rem; font-family: 'Courier New', monospace; }
 #camera-list { padding: 6px 8px 10px; }
 .cam-row {
-    padding: 7px 10px; border-radius: 8px; cursor: pointer;
-    margin-bottom: 3px; border-left: 3px solid transparent;
-    background: rgba(255,255,255,0.03);
+    padding: 7px 10px; border-radius: 8px; cursor: pointer; margin-bottom: 3px;
+    border-left: 3px solid transparent; background: rgba(255,255,255,0.03);
     transition: all .15s;
 }
-.cam-row:hover {
-    background: rgba(99,102,241,0.15);
-    border-left-color: #6366f1; transform: translateX(3px);
-}
-.cam-row.active {
-    background: rgba(99,102,241,0.28);
-    border-left-color: #6366f1;
-    box-shadow: 0 2px 8px rgba(99,102,241,0.3);
-}
+.cam-row:hover { background: rgba(99,102,241,0.15); border-left-color: #6366f1; transform: translateX(3px); }
+.cam-row.active { background: rgba(99,102,241,0.28); border-left-color: #6366f1; box-shadow: 0 2px 8px rgba(99,102,241,0.3); }
 .cam-row .name { color: #fff; font-size: .76rem; font-weight: 500; }
-.cam-row .coords {
-    font-family: 'Courier New', monospace;
-    font-size: .66rem; color: #00ffcc; margin-top: 2px;
-}
-
+.cam-row .coords { font-family: 'Courier New', monospace; font-size: .66rem; color: #00ffcc; margin-top: 2px; }
 .pixel-popup .leaflet-popup-content-wrapper {
     background: #0f172a; color: #fff; border-radius: 14px;
     padding: 0; border: 1px solid rgba(255,255,255,0.12);
@@ -277,18 +158,10 @@ body { overflow: hidden; background: #0b1120; }
 }
 .pixel-popup .leaflet-popup-content { margin: 0; width: 360px !important; }
 .pixel-popup .leaflet-popup-tip { background: #0f172a; }
-
-.pp-head {
-    padding: 10px 12px; font-weight: 700; font-size: .85rem;
-    display: flex; align-items: center; gap: 6px;
-}
-.pp-media {
-    background: #000; position: relative;
-    aspect-ratio: 16/9; overflow: hidden;
-}
+.pp-head { padding: 10px 12px; font-weight: 700; font-size: .85rem; display: flex; align-items: center; gap: 6px; }
+.pp-media { background: #000; position: relative; aspect-ratio: 16/9; overflow: hidden; }
 .pp-media video, .pp-media img, .pp-media iframe {
-    width: 100%; height: 100%; object-fit: cover;
-    border: 0; display: block; background: #000;
+    width: 100%; height: 100%; object-fit: cover; border: 0; display: block; background: #000;
 }
 .pp-media .badge-live {
     position: absolute; top: 8px; left: 8px; z-index: 2;
@@ -296,10 +169,7 @@ body { overflow: hidden; background: #0b1120; }
     font-size: .62rem; font-weight: 700; padding: 3px 8px; border-radius: 20px;
     display: flex; align-items: center; gap: 4px;
 }
-.pp-media .badge-live .dot {
-    width: 6px; height: 6px; background:#fff; border-radius:50%;
-    animation: pulseLive 1.4s infinite;
-}
+.pp-media .badge-live .dot { width: 6px; height: 6px; background:#fff; border-radius:50%; animation: pulseLive 1.4s infinite; }
 @keyframes pulseLive { 0%,100%{opacity:1;} 50%{opacity:.35;} }
 .pp-media .badge-type {
     position: absolute; top: 8px; right: 8px; z-index: 2;
@@ -327,8 +197,7 @@ body { overflow: hidden; background: #0b1120; }
     position: absolute; bottom: 6px; left: 8px; z-index: 3;
     background: rgba(0,0,0,0.65); color: #00ffcc;
     font-size: .58rem; font-weight: 600; padding: 2px 8px;
-    border-radius: 10px; display: none;
-    align-items: center; gap: 5px; pointer-events: none;
+    border-radius: 10px; display: none; align-items: center; gap: 5px; pointer-events: none;
 }
 .pp-media .jpg-status i { font-size: .55rem; }
 .pp-media .error-box .fixbtn {
@@ -336,50 +205,27 @@ body { overflow: hidden; background: #0b1120; }
     border: 0; border-radius: 15px; font-size: .65rem; font-weight: 700;
     cursor: pointer; text-decoration: none;
 }
-.pp-media video::-webkit-media-controls-panel {
-    background-image: linear-gradient(transparent, rgba(0,0,0,0.85));
-}
-.pp-media video::-webkit-media-controls-play-button,
-.pp-media video::-webkit-media-controls-volume-slider,
-.pp-media video::-webkit-media-controls-timeline,
-.pp-media video::-webkit-media-controls-current-time-display,
-.pp-media video::-webkit-media-controls-time-remaining-display,
-.pp-media video::-webkit-media-controls-mute-button,
-.pp-media video::-webkit-media-controls-fullscreen-button {
-    filter: brightness(1.2) contrast(1.15);
-}
-
 .pp-body { padding: 10px 12px 12px; }
-.pp-body .row {
-    display: flex; justify-content: space-between; font-size: .72rem;
-    padding: 5px 0;
-}
+.pp-body .row { display: flex; justify-content: space-between; font-size: .72rem; padding: 5px 0; }
 .pp-body .row .lbl { color: #94a3b8; }
 .pp-body .btnrow { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .pp-body .btnrow a {
     flex: 1; text-align: center; padding: 6px 6px; border-radius: 20px;
     text-decoration: none; font-size: .68rem; font-weight: 700;
-    cursor: pointer; border: 0;
-    background: rgba(99,102,241,0.25); color: #c7d2fe;
-    transition: all .15s; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer; border: 0; background: rgba(99,102,241,0.25); color: #c7d2fe;
+    transition: all .15s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .pp-body .btnrow a:hover { background: #6366f1; color: #fff; }
-
 .toggle-wrap {
-    position: absolute; top: 220px; right: 12px;
-    z-index: 900; display: flex; flex-direction: column; gap: 8px;
-    padding: 8px; background: rgba(15,23,42,0.94);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 14px;
+    position: absolute; top: 220px; right: 12px; z-index: 900;
+    display: flex; flex-direction: column; gap: 8px; padding: 8px;
+    background: rgba(15,23,42,0.94); backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
     box-shadow: 0 12px 30px rgba(0,0,0,0.5);
 }
 .toggle-btn {
-    background: rgba(30,41,59,0.7);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #cbd5e1;
-    width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(30,41,59,0.7); border: 1px solid rgba(255,255,255,0.08);
+    color: #cbd5e1; width: 38px; height: 38px; border-radius: 10px;
     font-size: .85rem; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: all .18s ease; position: relative; padding: 0;
@@ -391,73 +237,47 @@ body { overflow: hidden; background: #0b1120; }
     box-shadow: 0 4px 12px rgba(99,102,241,0.45);
 }
 .toggle-btn .tb-label {
-    position: absolute; right: calc(100% + 10px);
-    top: 50%; transform: translateY(-50%);
-    background: rgba(0,0,0,0.92); color: #fff;
-    font-size: .7rem; font-weight: 600;
-    padding: 5px 10px; border-radius: 6px;
-    white-space: nowrap; opacity: 0; pointer-events: none;
-    transition: opacity .18s;
-    border: 1px solid rgba(255,255,255,0.1);
+    position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+    background: rgba(0,0,0,0.92); color: #fff; font-size: .7rem; font-weight: 600;
+    padding: 5px 10px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none;
+    transition: opacity .18s; border: 1px solid rgba(255,255,255,0.1);
 }
 .toggle-btn:hover .tb-label { opacity: 1; }
-
 .radar-controls {
     position: absolute; bottom: 24px; right: 12px; z-index: 900;
     background: rgba(15,23,42,0.94); backdrop-filter: blur(14px);
     border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
     padding: 10px 14px; display: flex; flex-direction: column; gap: 6px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-    min-width: 200px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5); min-width: 200px;
 }
-.radar-controls label {
-    color: #94a3b8; font-size: .68rem; font-weight: 600;
-    display: flex; align-items: center; gap: 6px;
-}
+.radar-controls label { color: #94a3b8; font-size: .68rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
 .radar-controls label i { color: #a78bfa; }
-.radar-controls .val {
-    margin-left: auto; color: #00ffcc; font-weight: 700;
-    font-family: 'Courier New', monospace; font-size: .72rem;
-}
-.radar-controls input[type="range"] {
-    width: 100%; cursor: pointer;
-    accent-color: #6366f1; height: 4px;
-}
-
+.radar-controls .val { margin-left: auto; color: #00ffcc; font-weight: 700; font-family: 'Courier New', monospace; font-size: .72rem; }
+.radar-controls input[type="range"] { width: 100%; cursor: pointer; accent-color: #6366f1; height: 4px; }
 .leaflet-control-layers {
     border-radius: 12px !important; overflow: hidden;
     border: 1px solid rgba(255,255,255,0.12) !important;
-    background: rgba(15,23,42,0.94) !important;
-    backdrop-filter: blur(12px);
-    color: #fff !important;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.5) !important;
-    padding: 0 !important;
+    background: rgba(15,23,42,0.94) !important; backdrop-filter: blur(12px);
+    color: #fff !important; box-shadow: 0 12px 30px rgba(0,0,0,0.5) !important; padding: 0 !important;
 }
 .leaflet-control-layers-expanded { padding: 10px 14px !important; }
 .leaflet-control-layers label {
-    color: #cbd5e1 !important; font-weight: 500;
-    font-size: .72rem; margin-bottom: 6px;
+    color: #cbd5e1 !important; font-weight: 500; font-size: .72rem; margin-bottom: 6px;
     display: flex; align-items: center; gap: 6px; cursor: pointer;
 }
 .leaflet-control-layers label:last-child { margin-bottom: 0; }
 .leaflet-control-layers label:hover { color: #fff !important; }
-.leaflet-control-layers input[type="radio"] {
-    accent-color: #6366f1; margin: 0; cursor: pointer;
-}
+.leaflet-control-layers input[type="radio"] { accent-color: #6366f1; margin: 0; cursor: pointer; }
 .leaflet-control-zoom {
-    border: none !important; border-radius: 12px !important;
-    overflow: hidden;
+    border: none !important; border-radius: 12px !important; overflow: hidden;
     box-shadow: 0 8px 20px rgba(0,0,0,0.35) !important;
     margin-top: 10px !important; margin-right: 10px !important;
 }
 .leaflet-control-zoom a {
-    background: rgba(15,23,42,0.94) !important;
-    backdrop-filter: blur(6px);
-    color: #fff !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    width: 34px !important; height: 34px !important;
-    line-height: 32px !important; font-size: 1.05rem !important;
-    transition: background .15s;
+    background: rgba(15,23,42,0.94) !important; backdrop-filter: blur(6px);
+    color: #fff !important; border: 1px solid rgba(255,255,255,0.1) !important;
+    width: 34px !important; height: 34px !important; line-height: 32px !important;
+    font-size: 1.05rem !important; transition: background .15s;
 }
 .leaflet-control-zoom a:hover { background: #1e293b !important; }
 .leaflet-control-zoom a:first-child { border-bottom: none !important; border-radius: 12px 12px 0 0 !important; }
@@ -491,8 +311,7 @@ body { overflow: hidden; background: #0b1120; }
 
         <a class="thaiwater-btn"
            href="https://nakhonsithammarat.thaiwater.net/dashboard"
-           target="_blank"
-           rel="noopener noreferrer"
+           target="_blank" rel="noopener noreferrer"
            title="ThaiWater Dashboard นครศรีธรรมราช">
             <img src="https://nakhonsithammarat.thaiwater.net/images/logos/nhc.png" alt="ThaiWater">
             <span class="tw-tooltip">💧 ข้อมูลน้ำ นครศรีธรรมราช</span>
@@ -578,12 +397,16 @@ body { overflow: hidden; background: #0b1120; }
 </div>
 
 <script>
+/* ============================================================
+   ★★★ Cloudflare Worker Proxy — ตั้งค่าแล้ว ★★★
+   ============================================================ */
+window.CCTV_PROXY = 'https://cctv-proxy.2ramrome.workers.dev/?url=';
+
 /* =========================================================
    ข้อมูลกล้องทั้งหมด
    ========================================================= */
 const CAMERAS = [];
 
-// ---------- 1) เทศบาลทุ่งสง ----------
 const TS_URL = "https://tsgcctv.fortiddns.com:8088/hls/";
 [
     { name: "คลองท่าเลา",          id: "KhlongThaLao",           lat: 8.1674212, lng: 99.6741829 },
@@ -599,7 +422,6 @@ const TS_URL = "https://tsgcctv.fortiddns.com:8088/hls/";
     color: '#2e8b57', icon: 'fa-water'
 }));
 
-// ---------- 2) DWR+RID นครฯ ----------
 [
     { code: "TNA01",   name: "ฝายบ้านตาล",       lat: 8.430936, lng: 99.879033, img: "http://119.110.213.190/PPPCCTV/NAKORN/TNA01/image.jpg" },
     { code: "TNA02",   name: "คลองวัดหญ้า",      lat: 8.476894, lng: 99.924250, img: "http://119.110.213.190/PPPCCTV/NAKORN/TNA02/image.jpg" },
@@ -624,7 +446,6 @@ const TS_URL = "https://tsgcctv.fortiddns.com:8088/hls/";
     color: '#16a085', icon: 'fa-camera'
 }));
 
-// ---------- 3) กล้องทางหลวง ----------
 [
     { name: "ท่าเรือ", lat: 8.276327,  lng: 99.9997621, url: "https://streaming2.highwaytraffic.go.th/Phase18/PER_18_002.stream/playlist.m3u8" },
     { name: "สิชล",   lat: 8.9598232, lng: 99.8948911, url: "https://streaming1.highwaytraffic.go.th/Phase8/PER_8_031.stream/playlist.m3u8" }
@@ -635,7 +456,6 @@ const TS_URL = "https://tsgcctv.fortiddns.com:8088/hls/";
     color: '#e67e22', icon: 'fa-car'
 }));
 
-// ---------- 4) GISTDA ----------
 CAMERAS.push({
     name: "[GISTDA] ปากพนัง", lat: 8.231653199, lng: 100.280462494,
     type: 'iframe',
@@ -644,7 +464,6 @@ CAMERAS.push({
     color: '#00b4d8', icon: 'fa-water'
 });
 
-// ---------- 5) YouTube ----------
 CAMERAS.push({
     name: "[YouTube] ตลาดร่อนพิบูลย์", lat: 8.184038, lng: 99.850916,
     type: 'youtube', videoId: "EVXZvL2IFQk",
@@ -652,7 +471,6 @@ CAMERAS.push({
     color: '#e53935', icon: 'fa-youtube'
 });
 
-// ---------- 6) เทศบาลนคร ----------
 const GRP_NC = { group: 'nakhoncity', groupName: 'เทศบาลนคร', color: '#00838f', icon: 'fa-video' };
 [
     { id: "SC004", name: "หน้าร.ร.ศาลามีชัยตัวที่ 2", lat: 8.382577, lng: 99.972193 },
@@ -885,7 +703,6 @@ const GRP_NC = { group: 'nakhoncity', groupName: 'เทศบาลนคร', 
     ...GRP_NC
 }));
 
-// ---------- 7) เทศบาลปากพนัง ----------
 const PPN_GRP = { group: 'pakphanang', groupName: 'เทศบาลปากพนัง', color: '#f39c12', icon: 'fa-video' };
 const PPN_CAMERAS = [
     {id:1, title:"ประตูทางเข้าหน้าสนามกีฬา", lat:8.35901, lng:100.20759, stream:"https://app:cctv84000@cctv.pakphanangcity.org:7001/hls/be95e8e9-8468-42ef-1d03-14d18a9e97ae.m3u?authKey=9e679a41-34ab-4706-9366-1d309a2ee466&hi=true&resolution=320p&auth=YXBwOnNwdGFQQ3VodmRWZ1loUG9Fc2d0VU0wUkthQVhkND1oenh4b2k6Y2YyNWVmYjQ0Yjg0YmFjOGI2ZDMwNzY1NmYyMmZlMzA%3D&chunked&sessionID=333626&hi"},
@@ -934,45 +751,28 @@ const map = L.map('map', {
 L.control.zoom({ position: 'topright' }).addTo(map);
 map.fitBounds(provinceBounds);
 
-/* =========================================================
-   BASE LAYERS
-   ========================================================= */
 const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-    maxZoom: 20,
-    subdomains: ['mt0','mt1','mt2','mt3'],
-    attribution: '© Google Maps'
+    maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3'], attribution: '© Google Maps'
 });
-
 const openTopo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-    maxZoom: 17,
-    attribution: '© OpenTopoMap (CC-BY-SA)'
+    maxZoom: 17, attribution: '© OpenTopoMap (CC-BY-SA)'
 });
-
 const esriDark = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 16,
-    attribution: '© Esri, HERE, Garmin, © OpenStreetMap contributors'
+    maxZoom: 16, attribution: '© Esri, HERE, Garmin, © OpenStreetMap contributors'
 });
-
 googleHybrid.addTo(map);
 
-const baseLayers = {
+L.control.layers({
     '🛰️ Google Hybrid': googleHybrid,
     '⛰️ OpenTopoMap': openTopo,
     '🌃 แบบมืด (Dark)': esriDark
-};
-
-L.control.layers(baseLayers, null, {
-    position: 'topright',
-    collapsed: false
-}).addTo(map);
+}, null, { position: 'topright', collapsed: false }).addTo(map);
 
 /* =========================================================
    RADAR
    ========================================================= */
 const RADAR_GIF_URL = 'https://semet.uk/loop/NSTLoop.gif';
-let radarLayer = L.imageOverlay(RADAR_GIF_URL, radarBounds, {
-    opacity: 0.7, interactive: false
-}).addTo(map);
+let radarLayer = L.imageOverlay(RADAR_GIF_URL, radarBounds, { opacity: 0.7, interactive: false }).addTo(map);
 let radarVisible = true;
 let radarOpacity = 0.7;
 
@@ -981,40 +781,28 @@ let radarOpacity = 0.7;
    ========================================================= */
 const GPX_URL = 'https://raw.githubusercontent.com/72media/my-file/refs/heads/main/23%E0%B8%AD%E0%B8%B3%E0%B9%80%E0%B8%A0%E0%B8%AD%E0%B9%80%E0%B8%A1%E0%B8%B7%E0%B8%AD%E0%B8%87%E0%B8%84%E0%B8%AD%E0%B8%99.gpx';
 let districtLayerGroup = null;
-let districtPolylines = {};
 let districtsVisible = true;
 
 async function loadDistrictBoundaries() {
     try {
         const res = await fetch(GPX_URL);
         const text = await res.text();
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(text, 'application/xml');
+        const xml = new DOMParser().parseFromString(text, 'application/xml');
         const trks = xml.querySelectorAll('trk');
-
         districtLayerGroup = L.layerGroup();
-
         trks.forEach(trk => {
             const nameEl = trk.querySelector('name');
             const districtName = nameEl ? nameEl.textContent.trim() : 'ไม่ทราบชื่อ';
-
             const points = [];
             trk.querySelectorAll('trkpt').forEach(pt => {
                 const lat = parseFloat(pt.getAttribute('lat'));
                 const lon = parseFloat(pt.getAttribute('lon'));
                 if (!isNaN(lat) && !isNaN(lon)) points.push([lat, lon]);
             });
-
             if (points.length < 2) return;
-
             const hue = (districtName.length * 47 + districtName.charCodeAt(0) * 13) % 360;
             const color = `hsl(${hue}, 70%, 55%)`;
-
-            const polyline = L.polyline(points, {
-                color: color, weight: 2.5, opacity: 0.85,
-                dashArray: '6 4', smoothFactor: 1
-            });
-
+            const polyline = L.polyline(points, { color, weight: 2.5, opacity: 0.85, dashArray: '6 4', smoothFactor: 1 });
             const midPoint = points[Math.floor(points.length / 2)];
             const label = L.marker(midPoint, {
                 icon: L.divIcon({
@@ -1024,17 +812,12 @@ async function loadDistrictBoundaries() {
                 }),
                 interactive: false
             });
-
-            districtPolylines[districtName] = polyline;
             districtLayerGroup.addLayer(polyline);
             districtLayerGroup.addLayer(label);
         });
-
         districtLayerGroup.addTo(map);
         console.log(`✅ โหลดขอบเขตอำเภอสำเร็จ ${trks.length} อำเภอ`);
-    } catch (e) {
-        console.error('❌ โหลด GPX ไม่สำเร็จ', e);
-    }
+    } catch (e) { console.error('❌ โหลด GPX ไม่สำเร็จ', e); }
 }
 
 /* =========================================================
@@ -1087,8 +870,7 @@ function buildMediaHTML(cam) {
     if (cam.type === 'youtube') {
         return `<div class="pp-media" id="media-${uid}">
             <span class="badge-type">YouTube</span>
-            <iframe src="https://www.youtube.com/embed/${cam.videoId}?autoplay=1&mute=1&rel=0"
-                allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/${cam.videoId}?autoplay=1&mute=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
         </div>`;
     }
     if (cam.type === 'iframe') {
@@ -1134,10 +916,8 @@ CAMERAS.forEach((cam, i) => {
     const marker = L.marker([cam.lat, cam.lng], { icon: createIcon(cam.color, cam.icon) })
         .addTo(GROUPS[cam.group].layer);
     marker.bindPopup(buildPopup(cam), {
-        className: 'pixel-popup', minWidth: 360, maxWidth: 380,
-        autoPanPadding: [40, 40]
+        className: 'pixel-popup', minWidth: 360, maxWidth: 380, autoPanPadding: [40, 40]
     });
-
     marker.on('popupopen', () => {
         if (cam.type === 'hls') startHLS(cam._uid, cam.url);
         else if (cam.type === 'jpg') startJpgRefresh(cam._uid, cam.url);
@@ -1146,7 +926,6 @@ CAMERAS.forEach((cam, i) => {
         stopHLS(cam._uid);
         stopJpgRefresh(cam._uid);
     });
-
     GROUPS[cam.group].camList.push(i);
     markerIndex.push({ marker, cam, groupKey: cam.group, idx: i });
 });
@@ -1163,17 +942,13 @@ function startHLS(uid, rawUrl) {
     if (!video) return;
     stopHLS(uid);
 
-    let cleanUrl = rawUrl;
-    let authHeader = null;
+    let cleanUrl = rawUrl, authHeader = null;
     const authMatch = rawUrl.match(/^(https?):\/\/([^:@\/]+):([^@\/]+)@(.+)$/);
     if (authMatch) {
         const [, proto, user, pass, rest] = authMatch;
         cleanUrl = `${proto}://${rest}`;
-        try {
-            authHeader = 'Basic ' + btoa(decodeURIComponent(user) + ':' + decodeURIComponent(pass));
-        } catch (e) {
-            authHeader = 'Basic ' + btoa(user + ':' + pass);
-        }
+        try { authHeader = 'Basic ' + btoa(decodeURIComponent(user) + ':' + decodeURIComponent(pass)); }
+        catch (e) { authHeader = 'Basic ' + btoa(user + ':' + pass); }
     }
 
     const showError = (msgHtml) => {
@@ -1188,11 +963,7 @@ function startHLS(uid, rawUrl) {
     if (window.Hls && Hls.isSupported()) {
         const hls = new Hls({
             enableWorker: true, lowLatencyMode: true, backBufferLength: 90,
-            xhrSetup: (xhr) => {
-                if (authHeader) {
-                    try { xhr.setRequestHeader('Authorization', authHeader); } catch (e) {}
-                }
-            }
+            xhrSetup: (xhr) => { if (authHeader) try { xhr.setRequestHeader('Authorization', authHeader); } catch (e) {} }
         });
         hls.loadSource(cleanUrl);
         hls.attachMedia(video);
@@ -1202,47 +973,36 @@ function startHLS(uid, rawUrl) {
         });
         hls.on(Hls.Events.ERROR, (e, data) => {
             if (data.fatal) {
-                if (data.response && data.response.code === 401) {
-                    showError('🔒 401 Unauthorized<br>Token อาจหมดอายุ<br>กด "เปิดในแท็บใหม่"');
-                } else if (data.response && data.response.code === 403) {
-                    showError('🚫 403 Forbidden<br>ไม่มีสิทธิ์เข้าถึง');
-                } else {
-                    const details = data.details || data.type || '';
-                    showError(`โหลดสตรีมไม่สำเร็จ<br><small>${details}</small>`);
-                }
+                if (data.response && data.response.code === 401) showError('🔒 401 Unauthorized<br>Token อาจหมดอายุ');
+                else if (data.response && data.response.code === 403) showError('🚫 403 Forbidden');
+                else showError(`โหลดสตรีมไม่สำเร็จ<br><small>${data.details || data.type || ''}</small>`);
             }
         });
         hlsPlayers[uid] = hls;
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = rawUrl;
-        video.addEventListener('loadedmetadata', () => {
-            if (loader) loader.style.display = 'none';
-            video.play().catch(() => {});
-        }, { once: true });
+        video.addEventListener('loadedmetadata', () => { if (loader) loader.style.display = 'none'; video.play().catch(() => {}); }, { once: true });
         video.addEventListener('error', () => showError(), { once: true });
-    } else {
-        showError('เบราว์เซอร์ไม่รองรับ HLS');
-    }
+    } else { showError('เบราว์เซอร์ไม่รองรับ HLS'); }
 }
 
 function stopHLS(uid) {
-    if (hlsPlayers[uid]) {
-        try { hlsPlayers[uid].destroy(); } catch (e) {}
-        delete hlsPlayers[uid];
-    }
+    if (hlsPlayers[uid]) { try { hlsPlayers[uid].destroy(); } catch (e) {} delete hlsPlayers[uid]; }
     const video = document.getElementById('video-' + uid);
     if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
 }
 
 /* =========================================================
-   JPG REALTIME — รองรับทั้ง http page และ https page
-   - ตรวจ location.protocol: ถ้าเป็น https → ใช้ proxy ก่อน (Mixed Content บล็อก direct http)
-   - ถ้าเป็น http → ยิง direct ก่อน (localhost)
-   - watchdog 10 วิ สำหรับ proxy, 8 วิ สำหรับ direct
-   - everLoaded: ไม่ให้ error box มาบังภาพที่เคยโหลดสำเร็จ
+   JPG REALTIME — ผ่าน Cloudflare Worker
    ========================================================= */
 const jpgStates = {};
 const PAGE_IS_HTTPS = (typeof location !== 'undefined' && location.protocol === 'https:');
+const HAS_CUSTOM_PROXY = window.CCTV_PROXY && window.CCTV_PROXY.indexOf('YOUR_WORKER') === -1;
+
+function proxied(targetUrl) {
+    if (!HAS_CUSTOM_PROXY) return null;
+    return window.CCTV_PROXY + encodeURIComponent(targetUrl);
+}
 
 function jpgCandidates(url) {
     const list = [];
@@ -1251,42 +1011,34 @@ function jpgCandidates(url) {
 
     try {
         const u = new URL(url);
-        const isIp = /^\d+\.\d+\.\d+\.\d+$/.test(u.hostname);
         const isHttps = u.protocol === 'https:';
         const noProto = u.host + u.pathname + (u.search || '');
+        const isIp = /^\d+\.\d+\.\d+\.\d+$/.test(u.hostname);
 
-        // ★ ต้นฉบับเป็น https อยู่แล้ว → ใช้ตรงได้ทุกกรณี (ไม่ติด Mixed Content)
+        // 1) ต้นฉบับเป็น https → ใช้ได้เลย
         if (isHttps) {
             add(url);
             return list;
         }
 
-        // ★ ต้นฉบับเป็น http
-        if (PAGE_IS_HTTPS) {
-            // หน้าเป็น https → ห้ามยิง http ตรง (ถูก Mixed Content block)
-            // ใช้ proxy ทุกตัว
-            add('https://images.weserv.nl/?url=' + noProto);
-            add('https://wsrv.nl/?url=' + noProto);
-            add('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
-            add('https://corsproxy.io/?url=' + encodeURIComponent(url));
-            add('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url));
-            // ไม่ใส่ direct http เลย
-        } else {
-            // หน้าเป็น http → ยิง direct ก่อน
+        // 2) ต้นฉบับ http
+        // 2.1) Cloudflare Worker (ใช้ก่อนเสมอถ้ามี)
+        const viaWorker = proxied(url);
+        if (viaWorker) add(viaWorker);
+
+        // 2.2) ถ้าหน้าเป็น http → ยิง direct ได้
+        if (!PAGE_IS_HTTPS) {
             add(url);
             if (!isIp) add(url.replace(/^http:/i, 'https:'));
-            add('https://images.weserv.nl/?url=' + noProto);
-            add('https://wsrv.nl/?url=' + noProto);
-            add('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
-            add('https://corsproxy.io/?url=' + encodeURIComponent(url));
-            add('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url));
         }
+
+        // 2.3) proxy สาธารณะ (backup)
+        add('https://images.weserv.nl/?url=' + noProto);
+        add('https://wsrv.nl/?url=' + noProto);
+        add('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+        add('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url));
     } catch (e) { add(url); }
     return list;
-}
-
-function isProxyCandidate(target) {
-    return /^https:\/\/(images\.weserv\.nl|wsrv\.nl|api\.allorigins\.win|corsproxy\.io|api\.codetabs\.com)/i.test(target);
 }
 
 window.jpgOnLoad = function (uid) {
@@ -1307,8 +1059,7 @@ window.jpgOnLoad = function (uid) {
     if (status) {
         status.style.display = 'flex';
         status.style.color = '#00ffcc';
-        const via = (st && isProxyCandidate(st.candidates[st.ci] || '')) ? ' · ผ่าน proxy' : '';
-        status.innerHTML = `<i class="fas fa-circle" style="color:#2ea043;"></i> อัปเดต ${now} น.${via}`;
+        status.innerHTML = `<i class="fas fa-circle" style="color:#2ea043;"></i> อัปเดต ${now} น.`;
     }
 };
 
@@ -1340,7 +1091,7 @@ function jpgAdvance(uid) {
     if (status) {
         status.style.display = 'flex';
         status.style.color = '#ffb3b3';
-        status.innerHTML = `<i class="fas fa-sync fa-spin"></i> กำลังลองช่องทางใหม่...`;
+        status.innerHTML = `<i class="fas fa-sync fa-spin"></i> ลองช่องทาง ${st.ci + 1}/${st.candidates.length}...`;
     }
 
     jpgLoadCurrent(uid);
@@ -1353,17 +1104,16 @@ function jpgLoadCurrent(uid) {
     if (st.loadTimeout) clearTimeout(st.loadTimeout);
 
     const target = st.candidates[st.ci] || st.url;
-    const sep  = target.includes('?') ? '&' : '?';
-    const url  = target + sep + '_t=' + Date.now();
+    const sep = target.includes('?') ? '&' : '?';
+    const url = target + sep + '_t=' + Date.now();
+    const isProxy = /^https:\/\/(cctv-proxy|images\.weserv\.nl|wsrv\.nl|api\.allorigins\.win|api\.codetabs\.com)/i.test(target);
 
-    // proxy ใช้เวลานานกว่า → watchdog 15 วิ; direct → 8 วิ
-    const timeoutMs = isProxyCandidate(target) ? 15000 : 8000;
     st.loadTimeout = setTimeout(() => {
         const s2 = jpgStates[uid];
         if (!s2) return;
         s2.loadTimeout = null;
         jpgAdvance(uid);
-    }, timeoutMs);
+    }, isProxy ? 10000 : 6000);
 
     img.style.display = 'block';
     img.src = url;
@@ -1372,20 +1122,15 @@ function jpgLoadCurrent(uid) {
 function startJpgRefresh(uid, url) {
     stopJpgRefresh(uid);
     jpgStates[uid] = {
-        url,
-        candidates: jpgCandidates(url),
-        ci: 0,
-        fails: 0,
-        ok: false,
-        everLoaded: false,
-        loadTimeout: null
+        url, candidates: jpgCandidates(url),
+        ci: 0, fails: 0, ok: false, everLoaded: false, loadTimeout: null
     };
     jpgLoadCurrent(uid);
 
     jpgTimers[uid] = setInterval(() => {
         const st = jpgStates[uid];
         if (!st) return;
-        if (st.loadTimeout) return; // กำลังรอโหลด → ข้าม
+        if (st.loadTimeout) return;
         jpgLoadCurrent(uid);
     }, 5000);
 }
@@ -1412,17 +1157,13 @@ function renderLegend() {
 
 function renderList() {
     const q = document.getElementById('search').value.toLowerCase().trim();
-    const items = markerIndex.filter(m =>
-        GROUPS[m.groupKey].active && (!q || m.cam.name.toLowerCase().includes(q))
-    );
-
+    const items = markerIndex.filter(m => GROUPS[m.groupKey].active && (!q || m.cam.name.toLowerCase().includes(q)));
     document.getElementById('camera-list').innerHTML = items.slice(0, 400).map(m => `
         <div class="cam-row" data-idx="${m.idx}" onclick="focusCam(${m.idx})">
             <div class="name">${m.cam.name}</div>
             <div class="coords">${m.cam.lat.toFixed(6)}, ${m.cam.lng.toFixed(6)}</div>
         </div>
     `).join('');
-
     const inlineStat = document.getElementById('stat-total-inline');
     if (inlineStat) inlineStat.textContent = items.length;
 }
@@ -1445,20 +1186,16 @@ window.toggleGroup = function (key) {
     renderList();
 };
 
-window.fitAll = function () {
-    map.flyToBounds(radarBounds, { padding: [30, 30], duration: 1.2 });
-};
+window.fitAll = function () { map.flyToBounds(radarBounds, { padding: [30, 30], duration: 1.2 }); };
 
 window.toggleRadar = function () {
     const btn = document.getElementById('tg-radar');
     const controls = document.getElementById('radar-controls');
     if (radarVisible) {
-        map.removeLayer(radarLayer);
-        btn.classList.remove('active');
+        map.removeLayer(radarLayer); btn.classList.remove('active');
         if (controls) controls.style.display = 'none';
     } else {
-        radarLayer.addTo(map);
-        btn.classList.add('active');
+        radarLayer.addTo(map); btn.classList.add('active');
         if (controls) controls.style.display = 'flex';
     }
     radarVisible = !radarVisible;
@@ -1466,13 +1203,8 @@ window.toggleRadar = function () {
 
 window.toggleDistrictLayer = function () {
     const btn = document.getElementById('tg-districts');
-    if (districtsVisible) {
-        map.removeLayer(districtLayerGroup);
-        btn.classList.remove('active');
-    } else {
-        districtLayerGroup.addTo(map);
-        btn.classList.add('active');
-    }
+    if (districtsVisible) { map.removeLayer(districtLayerGroup); btn.classList.remove('active'); }
+    else { districtLayerGroup.addTo(map); btn.classList.add('active'); }
     districtsVisible = !districtsVisible;
 };
 
@@ -1483,40 +1215,28 @@ window.onRadarOpacityChange = function (val) {
 };
 
 window.toggleSidebarSection = function (sectionId) {
-    const section = document.getElementById(sectionId);
-    if (!section) return;
-    section.classList.toggle('collapsed');
+    const s = document.getElementById(sectionId);
+    if (s) s.classList.toggle('collapsed');
 };
 
 let sidebarCollapsed = false;
-
 window.toggleSidebar = function () {
     const sidebar = document.getElementById('testSidebar');
     const revealBtn = document.getElementById('sidebarRevealBtn');
-
     sidebarCollapsed = !sidebarCollapsed;
-
     if (sidebarCollapsed) {
         sidebar.classList.add('collapsed');
-        setTimeout(() => {
-            revealBtn.classList.add('show');
-        }, 200);
+        setTimeout(() => revealBtn.classList.add('show'), 200);
     } else {
         revealBtn.classList.remove('show');
-        setTimeout(() => {
-            sidebar.classList.remove('collapsed');
-        }, 100);
+        setTimeout(() => sidebar.classList.remove('collapsed'), 100);
     }
 };
 
 function updateThaiDateTime() {
     const now = new Date();
-    const thaiDate = now.toLocaleDateString('th-TH', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-    });
-    const thaiTime = now.toLocaleTimeString('th-TH', {
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    }) + ' น.';
+    const thaiDate = now.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const thaiTime = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) + ' น.';
     const dateEl = document.getElementById('thai-date');
     const timeEl = document.getElementById('thai-time');
     if (dateEl) dateEl.textContent = thaiDate;
@@ -1531,15 +1251,14 @@ loadDistrictBoundaries();
 
 console.log(`✅ โหลดกล้องทั้งหมด ${CAMERAS.length} ตัว`);
 console.log(`✅ หน้าเว็บรันบน: ${PAGE_IS_HTTPS ? 'HTTPS' : 'HTTP'}`);
-console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เพราะหน้าเป็น https)' : 'direct + proxy fallback'}`);
+console.log(`✅ Cloudflare Worker: ${HAS_CUSTOM_PROXY ? 'พร้อมใช้งาน' : '⚠️ ยังไม่ได้ตั้งค่า'}`);
 </script>
 <script>
 /**
- * nst-water-stations.js
+ * nst-water-stations.js — สถานีวัดระดับน้ำ จ.นครศรีธรรมราช
  */
 (function (root) {
     'use strict';
-
     const CONFIG = {
         province: 'นครศรีธรรมราช',
         bbox: { south: 7.85, north: 9.10, west: 99.30, east: 100.45 },
@@ -1547,7 +1266,6 @@ console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เ�
         hiiUrl: 'https://floodwatch.cloud/api/external/water-stations',
         proxy: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u)
     };
-
     const SITUATION = {
         1: { color: '#a35709', label: 'น้ำน้อยวิกฤต' },
         2: { color: '#f39c12', label: 'น้ำน้อย' },
@@ -1564,34 +1282,25 @@ console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เ�
             return await r.json();
         } catch (e) {
             const r2 = await fetch(CONFIG.proxy(url));
-            if (!r2.ok) throw new Error('HTTP ' + r2.status + ' (proxy) — ' + url);
+            if (!r2.ok) throw new Error('HTTP ' + r2.status + ' (proxy)');
             return r2.json();
         }
     }
-
     const clean = s => String(s || '').replace(/^จ\.\s*/, '').replace(/^จังหวัด\s*/, '').trim();
-
-    function inBBox(lat, lng) {
+    const inBBox = (lat, lng) => {
         const b = CONFIG.bbox;
         return lat >= b.south && lat <= b.north && lng >= b.west && lng <= b.east;
-    }
+    };
 
     function normalize(st, source) {
         const lat = parseFloat(st.station?.tele_station_lat);
         const lng = parseFloat(st.station?.tele_station_long);
         if (isNaN(lat) || isNaN(lng)) return null;
-
         const province = clean(st.geocode?.province_name?.th);
         let matchedBy;
-        if (province) {
-            if (province !== CONFIG.province) return null;
-            matchedBy = 'province';
-        } else if (inBBox(lat, lng)) {
-            matchedBy = 'bbox';
-        } else {
-            return null;
-        }
-
+        if (province) { if (province !== CONFIG.province) return null; matchedBy = 'province'; }
+        else if (inBBox(lat, lng)) matchedBy = 'bbox';
+        else return null;
         const wl = st.waterlevel_msl != null ? parseFloat(st.waterlevel_msl) : null;
         const prev = st.waterlevel_msl_previous != null ? parseFloat(st.waterlevel_msl_previous) : null;
         let trend = 'ทรงตัว';
@@ -1600,7 +1309,6 @@ console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เ�
             if (d > 0.01) trend = 'ขึ้น'; else if (d < -0.01) trend = 'ลด';
         }
         const sit = SITUATION[st.situation_level] || UNKNOWN;
-
         return {
             id: st.station?.tele_station_oldcode || null,
             name: st.station?.tele_station_name?.th || st.station?.tele_station_name?.en || st.station?.tele_station_oldcode || '-',
@@ -1610,31 +1318,24 @@ console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เ�
             province: province || CONFIG.province,
             agency: st.agency?.agency_shortname?.th || '-',
             river: st.river_name || '',
-            water_level_msl: wl,
-            water_level_prev: prev,
-            trend,
+            water_level_msl: wl, water_level_prev: prev, trend,
             bank_diff: st.diff_wl_bank != null ? parseFloat(st.diff_wl_bank) : null,
             bank_text: st.diff_wl_bank_text || '',
             storage_percent: st.storage_percent != null ? st.storage_percent : null,
             situation_level: st.situation_level ?? null,
-            situation: sit.label,
-            color: sit.color,
+            situation: sit.label, color: sit.color,
             datetime: st.waterlevel_datetime || '',
-            source,
-            matchedBy
+            source, matchedBy
         };
     }
-
     const keysOf = s => {
         const k = [];
         if (s.id) k.push('code:' + String(s.id).trim());
         k.push('pos:' + s.lat.toFixed(4) + ',' + s.lng.toFixed(4));
         return k;
     };
-
-    function buildList(thaiwaterPayload, hiiPayload) {
-        const out = [];
-        const seen = new Set();
+    function buildList(tw, hii) {
+        const out = [], seen = new Set();
         const add = (rows, source, agencyOnly) => {
             (rows || []).forEach(raw => {
                 if (agencyOnly && (raw.agency?.agency_shortname?.th || '').trim() !== agencyOnly) return;
@@ -1646,30 +1347,16 @@ console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เ�
                 out.push(s);
             });
         };
-        add(thaiwaterPayload?.waterlevel_data?.data, 'thaiwater');
-        add(hiiPayload?.waterlevel_data?.data, 'hii', 'สสน.');
-        return out.sort((a, b) =>
-            a.amphoe.localeCompare(b.amphoe, 'th') || a.name.localeCompare(b.name, 'th'));
+        add(tw?.waterlevel_data?.data, 'thaiwater');
+        add(hii?.waterlevel_data?.data, 'hii', 'สสน.');
+        return out.sort((a, b) => a.amphoe.localeCompare(b.amphoe, 'th') || a.name.localeCompare(b.name, 'th'));
     }
-
     async function load() {
-        const [tw, hii] = await Promise.allSettled([
-            fetchJson(CONFIG.thaiwaterUrl), fetchJson(CONFIG.hiiUrl)
-        ]);
+        const [tw, hii] = await Promise.allSettled([fetchJson(CONFIG.thaiwaterUrl), fetchJson(CONFIG.hiiUrl)]);
         if (tw.status === 'rejected') console.warn('โหลด Thai Water ไม่สำเร็จ:', tw.reason);
         if (hii.status === 'rejected') console.warn('โหลด สสน. ไม่สำเร็จ:', hii.reason);
         if (tw.status === 'rejected' && hii.status === 'rejected') throw new Error('โหลดข้อมูลไม่สำเร็จทั้งสองแหล่ง');
         return buildList(tw.value, hii.value);
-    }
-
-    function toGeoJSON(stations) {
-        return {
-            type: 'FeatureCollection',
-            features: stations.map(s => {
-                const { lat, lng, ...props } = s;
-                return { type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] }, properties: props };
-            })
-        };
     }
 
     const CARD_CSS = `
@@ -1696,7 +1383,6 @@ console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เ�
         el.textContent = CARD_CSS;
         document.head.appendChild(el);
     }
-
     const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
     function popupHTML(s) {
@@ -1738,7 +1424,6 @@ console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เ�
       <span><span class="nstw-mini-val" style="color:${bankColor};">${s.bank_diff != null ? s.bank_diff : '-'}</span><span class="nstw-mini-unit">ม.</span></span>
     </div>
     ${s.river ? `<div style="font-size:.6rem;color:#9aa0a6;font-weight:700;margin-top:6px;"><i class="fas fa-water"></i> แม่น้ำ/ลำน้ำ: ${esc(s.river)}</div>` : ''}
-    ${s.name_en ? `<div style="font-size:.58rem;color:#9aa0a6;font-weight:700;margin-top:3px;">${esc(s.name_en)}</div>` : ''}
     <div style="font-size:.58rem;color:#9aa0a6;font-weight:700;margin-top:5px;"><i class="far fa-clock"></i> ${esc(s.datetime || '-')} น.</div>
   </div>
 </div>`;
@@ -1764,22 +1449,10 @@ console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เ�
         return group;
     }
 
-    function download(filename, text, type) {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([text], { type: type || 'application/json' }));
-        a.download = filename; a.click();
-        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    }
-
-    const api = {
-        CONFIG, load, buildList, normalize, toGeoJSON, addToLeaflet, popupHTML,
-        downloadGeoJSON: st => download('nst-water-stations.geojson', JSON.stringify(toGeoJSON(st), null, 2)),
-        downloadJSON: st => download('nst-water-stations.json', JSON.stringify(st, null, 2))
-    };
+    const api = { CONFIG, load, buildList, normalize, addToLeaflet, popupHTML };
     root.NSTWater = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);
-
 
 let nstwGroup = null, nstwOn = true, nstwTimer = null;
 
