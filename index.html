@@ -16,9 +16,6 @@
 body { overflow: hidden; background: #0b1120; }
 #map { height: 100vh; width: 100%; z-index: 1; }
 
-/* ============================================================
-   SIDEBAR
-   ============================================================ */
 .test-sidebar {
     position: absolute; top: 12px; left: 12px;
     width: 340px;
@@ -83,9 +80,6 @@ body { overflow: hidden; background: #0b1120; }
 }
 .sidebar-reveal-btn:hover .reveal-tooltip { opacity: 1; }
 
-/* ============================================================
-   การ์ดวันเวลาไทย + ปุ่ม ThaiWater
-   ============================================================ */
 .thai-datetime-card {
     padding: 14px 16px;
     background: linear-gradient(135deg, rgba(243,156,18,0.22), rgba(230,126,34,0.12));
@@ -178,9 +172,6 @@ body { overflow: hidden; background: #0b1120; }
 }
 .sidebar-collapse-btn:hover .collapse-tooltip { opacity: 1; }
 
-/* ============================================================
-   Search
-   ============================================================ */
 .sidebar-head {
     padding: 10px 14px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -198,9 +189,6 @@ body { overflow: hidden; background: #0b1120; }
 .sidebar-head input:focus { border-color: #6366f1; }
 .sidebar-head input::placeholder { color: #64748b; }
 
-/* ============================================================
-   Sections
-   ============================================================ */
 .sidebar-section {
     display: flex; flex-direction: column;
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -282,9 +270,6 @@ body { overflow: hidden; background: #0b1120; }
     font-size: .66rem; color: #00ffcc; margin-top: 2px;
 }
 
-/* ============================================================
-   POPUP
-   ============================================================ */
 .pixel-popup .leaflet-popup-content-wrapper {
     background: #0f172a; color: #fff; border-radius: 14px;
     padding: 0; border: 1px solid rgba(255,255,255,0.12);
@@ -381,9 +366,6 @@ body { overflow: hidden; background: #0b1120; }
 }
 .pp-body .btnrow a:hover { background: #6366f1; color: #fff; }
 
-/* ============================================================
-   TOGGLE BUTTONS
-   ============================================================ */
 .toggle-wrap {
     position: absolute; top: 220px; right: 12px;
     z-index: 900; display: flex; flex-direction: column; gap: 8px;
@@ -420,9 +402,6 @@ body { overflow: hidden; background: #0b1120; }
 }
 .toggle-btn:hover .tb-label { opacity: 1; }
 
-/* ============================================================
-   RADAR
-   ============================================================ */
 .radar-controls {
     position: absolute; bottom: 24px; right: 12px; z-index: 900;
     background: rgba(15,23,42,0.94); backdrop-filter: blur(14px);
@@ -445,9 +424,6 @@ body { overflow: hidden; background: #0b1120; }
     accent-color: #6366f1; height: 4px;
 }
 
-/* ============================================================
-   LEAFLET CONTROLS
-   ============================================================ */
 .leaflet-control-layers {
     border-radius: 12px !important; overflow: hidden;
     border: 1px solid rgba(255,255,255,0.12) !important;
@@ -1259,12 +1235,14 @@ function stopHLS(uid) {
 }
 
 /* =========================================================
-   JPG REALTIME — รีเฟรชอัตโนมัติตลอดเวลาที่เปิด popup
-   - ยิง direct URL เป็น candidate แรก (http page โหลด http ได้เลย)
-   - มี watchdog 8 วิ: ถ้า onload/onerror ไม่มา → ถือว่า fail → ไปตัวถัดไป
-   - ไม่ซ่อนภาพที่เคยโหลดสำเร็จ (everLoaded) แม้รอบรีเฟรชจะล้ม
+   JPG REALTIME — รองรับทั้ง http page และ https page
+   - ตรวจ location.protocol: ถ้าเป็น https → ใช้ proxy ก่อน (Mixed Content บล็อก direct http)
+   - ถ้าเป็น http → ยิง direct ก่อน (localhost)
+   - watchdog 10 วิ สำหรับ proxy, 8 วิ สำหรับ direct
+   - everLoaded: ไม่ให้ error box มาบังภาพที่เคยโหลดสำเร็จ
    ========================================================= */
 const jpgStates = {};
+const PAGE_IS_HTTPS = (typeof location !== 'undefined' && location.protocol === 'https:');
 
 function jpgCandidates(url) {
     const list = [];
@@ -1274,23 +1252,41 @@ function jpgCandidates(url) {
     try {
         const u = new URL(url);
         const isIp = /^\d+\.\d+\.\d+\.\d+$/.test(u.hostname);
+        const isHttps = u.protocol === 'https:';
         const noProto = u.host + u.pathname + (u.search || '');
 
-        // 1) direct ตัวจริงก่อนเสมอ (http page + http origin ใช้ได้เลย)
-        add(url);
-
-        // 2) อัปเกรด https (เฉพาะ non-IP)
-        if (u.protocol === 'http:' && !isIp) {
-            add(url.replace(/^http:/i, 'https:'));
+        // ★ ต้นฉบับเป็น https อยู่แล้ว → ใช้ตรงได้ทุกกรณี (ไม่ติด Mixed Content)
+        if (isHttps) {
+            add(url);
+            return list;
         }
 
-        // 3) proxy
-        add('https://images.weserv.nl/?url=' + noProto);
-        add('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
-        add('https://corsproxy.io/?url=' + encodeURIComponent(url));
-        add('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url));
+        // ★ ต้นฉบับเป็น http
+        if (PAGE_IS_HTTPS) {
+            // หน้าเป็น https → ห้ามยิง http ตรง (ถูก Mixed Content block)
+            // ใช้ proxy ทุกตัว
+            add('https://images.weserv.nl/?url=' + noProto);
+            add('https://wsrv.nl/?url=' + noProto);
+            add('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+            add('https://corsproxy.io/?url=' + encodeURIComponent(url));
+            add('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url));
+            // ไม่ใส่ direct http เลย
+        } else {
+            // หน้าเป็น http → ยิง direct ก่อน
+            add(url);
+            if (!isIp) add(url.replace(/^http:/i, 'https:'));
+            add('https://images.weserv.nl/?url=' + noProto);
+            add('https://wsrv.nl/?url=' + noProto);
+            add('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+            add('https://corsproxy.io/?url=' + encodeURIComponent(url));
+            add('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url));
+        }
     } catch (e) { add(url); }
     return list;
+}
+
+function isProxyCandidate(target) {
+    return /^https:\/\/(images\.weserv\.nl|wsrv\.nl|api\.allorigins\.win|corsproxy\.io|api\.codetabs\.com)/i.test(target);
 }
 
 window.jpgOnLoad = function (uid) {
@@ -1311,7 +1307,8 @@ window.jpgOnLoad = function (uid) {
     if (status) {
         status.style.display = 'flex';
         status.style.color = '#00ffcc';
-        status.innerHTML = `<i class="fas fa-circle" style="color:#2ea043;"></i> อัปเดตล่าสุด ${now} น. · รีเฟรชอัตโนมัติทุก 5 วิ`;
+        const via = (st && isProxyCandidate(st.candidates[st.ci] || '')) ? ' · ผ่าน proxy' : '';
+        status.innerHTML = `<i class="fas fa-circle" style="color:#2ea043;"></i> อัปเดต ${now} น.${via}`;
     }
 };
 
@@ -1332,7 +1329,6 @@ function jpgAdvance(uid) {
     const loader = document.getElementById('loader-' + uid);
     if (loader) loader.style.display = 'none';
 
-    // error UI เฉพาะตอนที่ยังไม่เคยโหลดสำเร็จ
     if (!st.everLoaded) {
         const err = document.getElementById('error-' + uid);
         const msg = document.getElementById('error-msg-' + uid);
@@ -1358,16 +1354,16 @@ function jpgLoadCurrent(uid) {
 
     const target = st.candidates[st.ci] || st.url;
     const sep  = target.includes('?') ? '&' : '?';
-    const bust = target.includes('images.weserv.nl') ? 'n=' : '_t=';
-    const url  = target + sep + bust + Date.now();
+    const url  = target + sep + '_t=' + Date.now();
 
-    // watchdog 8 วิ
+    // proxy ใช้เวลานานกว่า → watchdog 15 วิ; direct → 8 วิ
+    const timeoutMs = isProxyCandidate(target) ? 15000 : 8000;
     st.loadTimeout = setTimeout(() => {
         const s2 = jpgStates[uid];
         if (!s2) return;
         s2.loadTimeout = null;
         jpgAdvance(uid);
-    }, 8000);
+    }, timeoutMs);
 
     img.style.display = 'block';
     img.src = url;
@@ -1389,8 +1385,7 @@ function startJpgRefresh(uid, url) {
     jpgTimers[uid] = setInterval(() => {
         const st = jpgStates[uid];
         if (!st) return;
-        // ถ้ากำลังรอโหลดอยู่ (watchdog ยังนับ) → ข้ามรอบนี้ ไม่ให้รบกวน
-        if (st.loadTimeout) return;
+        if (st.loadTimeout) return; // กำลังรอโหลด → ข้าม
         jpgLoadCurrent(uid);
     }, 5000);
 }
@@ -1493,9 +1488,6 @@ window.toggleSidebarSection = function (sectionId) {
     section.classList.toggle('collapsed');
 };
 
-/* =========================================================
-   Sidebar collapse
-   ========================================================= */
 let sidebarCollapsed = false;
 
 window.toggleSidebar = function () {
@@ -1517,9 +1509,6 @@ window.toggleSidebar = function () {
     }
 };
 
-/* =========================================================
-   วันที่-เวลาไทย
-   ========================================================= */
 function updateThaiDateTime() {
     const now = new Date();
     const thaiDate = now.toLocaleDateString('th-TH', {
@@ -1536,22 +1525,17 @@ function updateThaiDateTime() {
 setInterval(updateThaiDateTime, 1000);
 updateThaiDateTime();
 
-/* =========================================================
-   INIT
-   ========================================================= */
 renderLegend();
 renderList();
 loadDistrictBoundaries();
 
 console.log(`✅ โหลดกล้องทั้งหมด ${CAMERAS.length} ตัว`);
-console.log(`✅ เรดาร์: ${RADAR_GIF_URL}`);
-console.log(`✅ Base layers: Google Hybrid / OpenTopoMap / Esri Dark Gray`);
-console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ บนหัว sidebar เพื่อยุบ)`);
+console.log(`✅ หน้าเว็บรันบน: ${PAGE_IS_HTTPS ? 'HTTPS' : 'HTTP'}`);
+console.log(`✅ JPG candidates จะใช้: ${PAGE_IS_HTTPS ? 'proxy (เพราะหน้าเป็น https)' : 'direct + proxy fallback'}`);
 </script>
 <script>
 /**
  * nst-water-stations.js
- * ดึงสถานีวัดระดับน้ำ "เฉพาะจังหวัดนครศรีธรรมราช"
  */
 (function (root) {
     'use strict';
@@ -1797,7 +1781,6 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
 })(typeof window !== 'undefined' ? window : globalThis);
 
 
-/* ---- ชั้นระดับน้ำ: ผูกกับแผนที่ (map) ของหน้านี้ ---- */
 let nstwGroup = null, nstwOn = true, nstwTimer = null;
 
 async function nstwRefresh() {
