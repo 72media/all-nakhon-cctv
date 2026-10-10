@@ -17,7 +17,7 @@ body { overflow: hidden; background: #0b1120; }
 #map { height: 100vh; width: 100%; z-index: 1; }
 
 /* ============================================================
-   SIDEBAR — ★ เพิ่ม transition + collapse state ★
+   SIDEBAR
    ============================================================ */
 .test-sidebar {
     position: absolute; top: 12px; left: 12px;
@@ -35,16 +35,12 @@ body { overflow: hidden; background: #0b1120; }
     opacity: 1;
 }
 
-/* ★ สถานะยุบ — เลื่อนออกซ้าย + จางลง */
 .test-sidebar.collapsed {
     transform: translateX(-380px);
     opacity: 0;
     pointer-events: none;
 }
 
-/* ============================================================
-   ★★★ ปุ่มเปิด Sidebar กลับมา (แสดงเฉพาะตอนยุบ) ★★★
-   ============================================================ */
 .sidebar-reveal-btn {
     position: absolute; top: 12px; left: 12px;
     z-index: 899;
@@ -118,9 +114,8 @@ body { overflow: hidden; background: #0b1120; }
 }
 .thai-datetime-card .dt-time i { color: #f59e0b; font-size: 1.05rem; }
 
-/* ThaiWater button */
 .thaiwater-btn {
-    position: absolute; top: 12px; right: 56px;  /* ★ ขยับซ้ายเพื่อหลบปุ่มยุบ */
+    position: absolute; top: 12px; right: 56px;
     z-index: 2;
     width: 42px; height: 42px;
     background: rgba(255,255,255,0.12);
@@ -153,7 +148,6 @@ body { overflow: hidden; background: #0b1120; }
 }
 .thaiwater-btn:hover .tw-tooltip { opacity: 1; }
 
-/* ★★★ ปุ่มยุบ Sidebar — อยู่มุมขวาบนของการ์ด ★★★ */
 .sidebar-collapse-btn {
     position: absolute; top: 12px; right: 12px;
     z-index: 3;
@@ -344,6 +338,14 @@ body { overflow: hidden; background: #0b1120; }
     flex-direction: column; gap: 6px; padding: 12px; text-align: center; line-height: 1.5;
 }
 .pp-media .error-box i { font-size: 1.4rem; color: #e57373; }
+.pp-media .jpg-status {
+    position: absolute; bottom: 6px; left: 8px; z-index: 3;
+    background: rgba(0,0,0,0.65); color: #00ffcc;
+    font-size: .58rem; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; display: none;
+    align-items: center; gap: 5px; pointer-events: none;
+}
+.pp-media .jpg-status i { font-size: .55rem; }
 .pp-media .error-box .fixbtn {
     margin-top: 4px; padding: 4px 12px; background: #4f46e5; color: #fff;
     border: 0; border-radius: 15px; font-size: .65rem; font-weight: 700;
@@ -490,13 +492,11 @@ body { overflow: hidden; background: #0b1120; }
 
 <div id="map"></div>
 
-<!-- ============ ★ ปุ่มเปิด Sidebar (แสดงเฉพาะตอนยุบ) ★ ============ -->
 <button class="sidebar-reveal-btn" id="sidebarRevealBtn" onclick="toggleSidebar()">
     <i class="fas fa-bars"></i>
     <span class="reveal-tooltip">เปิดแถบด้านซ้าย</span>
 </button>
 
-<!-- ============ SIDEBAR ============ -->
 <div class="test-sidebar" id="testSidebar">
     <div class="thai-datetime-card">
         <div class="dt-day">
@@ -508,13 +508,11 @@ body { overflow: hidden; background: #0b1120; }
             <span id="thai-time">00:00:00 น.</span>
         </div>
 
-        <!-- ★ ปุ่มยุบ Sidebar อยู่ขวาบน ★ -->
         <button class="sidebar-collapse-btn" onclick="toggleSidebar()" title="ยุบแถบซ้าย">
             <i class="fas fa-chevron-left"></i>
             <span class="collapse-tooltip">ยุบเก็บ</span>
         </button>
 
-        <!-- ปุ่ม ThaiWater Dashboard -->
         <a class="thaiwater-btn"
            href="https://nakhonsithammarat.thaiwater.net/dashboard"
            target="_blank"
@@ -579,7 +577,6 @@ body { overflow: hidden; background: #0b1120; }
     </div>
 </div>
 
-<!-- ============ TOGGLE BUTTONS ============ -->
 <div class="toggle-wrap">
     <button class="toggle-btn active" id="tg-radar" onclick="toggleRadar()">
         <i class="fas fa-satellite-dish"></i>
@@ -950,15 +947,16 @@ PPN_CAMERAS.forEach(c => CAMERAS.push({
    MAP
    ========================================================= */
 var radarBounds = [[7.595929609239565, 98.66181095811945], [9.697971242406755, 100.6377990348955]];
+const provinceBounds = [[7.80, 99.20], [9.15, 100.60]];
 
 const map = L.map('map', {
     zoomControl: false,
     maxBounds: radarBounds,
     maxBoundsViscosity: 1.0
-}).setView([8.65, 99.5], 8);
+}).setView([8.45, 99.95], 9);
 
 L.control.zoom({ position: 'topright' }).addTo(map);
-map.fitBounds(radarBounds);
+map.fitBounds(provinceBounds);
 
 /* =========================================================
    BASE LAYERS
@@ -1097,14 +1095,15 @@ function buildMediaHTML(cam) {
     if (cam.type === 'jpg') {
         return `<div class="pp-media" id="media-${uid}">
             <span class="badge-live"><span class="dot"></span> LIVE</span>
-            <span class="badge-type">JPG · 5s</span>
-            <div class="loader" id="loader-${uid}"><div class="spinner"></div></div>
+            <span class="badge-type">JPG · Realtime</span>
+            <div class="loader" id="loader-${uid}"><div class="spinner"></div><div>กำลังโหลดภาพ...</div></div>
             <img id="img-${uid}" alt="${cam.name}"
-                onload="document.getElementById('loader-${uid}').style.display='none';"
-                onerror="this.style.display='none'; document.getElementById('error-${uid}').style.display='flex';">
+                onload="jpgOnLoad(${uid})"
+                onerror="jpgOnError(${uid})">
+            <div class="jpg-status" id="jpg-status-${uid}">กำลังเชื่อมต่อ...</div>
             <div class="error-box" id="error-${uid}">
                 <i class="fas fa-exclamation-triangle"></i>
-                <div>โหลดภาพไม่สำเร็จ</div>
+                <div id="error-msg-${uid}">โหลดภาพไม่สำเร็จ — ระบบจะลองใหม่อัตโนมัติ...</div>
                 <a class="fixbtn" href="${cam.url}" target="_blank">เปิดในแท็บใหม่</a>
             </div>
         </div>`;
@@ -1165,7 +1164,7 @@ CAMERAS.forEach((cam, i) => {
 
     marker.on('popupopen', () => {
         if (cam.type === 'hls') startHLS(cam._uid, cam.url);
-        else if (cam.type === 'jpg') { refreshJpgNow(cam._uid, cam.url); startJpgRefresh(cam._uid, cam.url); }
+        else if (cam.type === 'jpg') startJpgRefresh(cam._uid, cam.url);
     });
     marker.on('popupclose', () => {
         stopHLS(cam._uid);
@@ -1259,31 +1258,148 @@ function stopHLS(uid) {
     if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
 }
 
-// โหลดภาพล่าสุดทันทีทุกครั้งที่เปิด popup (ใส่ timestamp กัน browser ใช้ภาพแคชเก่า)
-function refreshJpgNow(uid, url) {
+/* =========================================================
+   JPG REALTIME — รีเฟรชอัตโนมัติตลอดเวลาที่เปิด popup
+   - ยิง direct URL เป็น candidate แรก (http page โหลด http ได้เลย)
+   - มี watchdog 8 วิ: ถ้า onload/onerror ไม่มา → ถือว่า fail → ไปตัวถัดไป
+   - ไม่ซ่อนภาพที่เคยโหลดสำเร็จ (everLoaded) แม้รอบรีเฟรชจะล้ม
+   ========================================================= */
+const jpgStates = {};
+
+function jpgCandidates(url) {
+    const list = [];
+    const add = u => { if (u && !list.includes(u)) list.push(u); };
+    if (!/^https?:\/\//i.test(url)) { add(url); return list; }
+
+    try {
+        const u = new URL(url);
+        const isIp = /^\d+\.\d+\.\d+\.\d+$/.test(u.hostname);
+        const noProto = u.host + u.pathname + (u.search || '');
+
+        // 1) direct ตัวจริงก่อนเสมอ (http page + http origin ใช้ได้เลย)
+        add(url);
+
+        // 2) อัปเกรด https (เฉพาะ non-IP)
+        if (u.protocol === 'http:' && !isIp) {
+            add(url.replace(/^http:/i, 'https:'));
+        }
+
+        // 3) proxy
+        add('https://images.weserv.nl/?url=' + noProto);
+        add('https://api.allorigins.win/raw?url=' + encodeURIComponent(url));
+        add('https://corsproxy.io/?url=' + encodeURIComponent(url));
+        add('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url));
+    } catch (e) { add(url); }
+    return list;
+}
+
+window.jpgOnLoad = function (uid) {
+    const st = jpgStates[uid];
+    if (st && st.loadTimeout) { clearTimeout(st.loadTimeout); st.loadTimeout = null; }
     const img = document.getElementById('img-' + uid);
     if (!img) return;
+    img.style.display = 'block';
+    if (st) { st.ok = true; st.fails = 0; st.everLoaded = true; }
+
     const loader = document.getElementById('loader-' + uid);
     const err = document.getElementById('error-' + uid);
-    if (loader) loader.style.display = 'flex';
+    if (loader) loader.style.display = 'none';
     if (err) err.style.display = 'none';
+
+    const now = new Date().toLocaleTimeString('th-TH', { hour12: false });
+    const status = document.getElementById('jpg-status-' + uid);
+    if (status) {
+        status.style.display = 'flex';
+        status.style.color = '#00ffcc';
+        status.innerHTML = `<i class="fas fa-circle" style="color:#2ea043;"></i> อัปเดตล่าสุด ${now} น. · รีเฟรชอัตโนมัติทุก 5 วิ`;
+    }
+};
+
+window.jpgOnError = function (uid) {
+    const st = jpgStates[uid];
+    if (!st) return;
+    if (st.loadTimeout) { clearTimeout(st.loadTimeout); st.loadTimeout = null; }
+    jpgAdvance(uid);
+};
+
+function jpgAdvance(uid) {
+    const st = jpgStates[uid];
+    if (!st) return;
+    st.ok = false;
+    st.fails++;
+    st.ci = (st.ci + 1) % st.candidates.length;
+
+    const loader = document.getElementById('loader-' + uid);
+    if (loader) loader.style.display = 'none';
+
+    // error UI เฉพาะตอนที่ยังไม่เคยโหลดสำเร็จ
+    if (!st.everLoaded) {
+        const err = document.getElementById('error-' + uid);
+        const msg = document.getElementById('error-msg-' + uid);
+        if (msg) msg.innerHTML = `โหลดภาพไม่สำเร็จ (ครั้งที่ ${st.fails})<br>กำลังลองช่องทางสำรองอัตโนมัติ...`;
+        if (err) err.style.display = 'flex';
+    }
+
+    const status = document.getElementById('jpg-status-' + uid);
+    if (status) {
+        status.style.display = 'flex';
+        status.style.color = '#ffb3b3';
+        status.innerHTML = `<i class="fas fa-sync fa-spin"></i> กำลังลองช่องทางใหม่...`;
+    }
+
+    jpgLoadCurrent(uid);
+}
+
+function jpgLoadCurrent(uid) {
+    const st = jpgStates[uid];
+    const img = document.getElementById('img-' + uid);
+    if (!st || !img) return;
+    if (st.loadTimeout) clearTimeout(st.loadTimeout);
+
+    const target = st.candidates[st.ci] || st.url;
+    const sep  = target.includes('?') ? '&' : '?';
+    const bust = target.includes('images.weserv.nl') ? 'n=' : '_t=';
+    const url  = target + sep + bust + Date.now();
+
+    // watchdog 8 วิ
+    st.loadTimeout = setTimeout(() => {
+        const s2 = jpgStates[uid];
+        if (!s2) return;
+        s2.loadTimeout = null;
+        jpgAdvance(uid);
+    }, 8000);
+
     img.style.display = 'block';
-    img.src = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
+    img.src = url;
 }
 
 function startJpgRefresh(uid, url) {
     stopJpgRefresh(uid);
+    jpgStates[uid] = {
+        url,
+        candidates: jpgCandidates(url),
+        ci: 0,
+        fails: 0,
+        ok: false,
+        everLoaded: false,
+        loadTimeout: null
+    };
+    jpgLoadCurrent(uid);
+
     jpgTimers[uid] = setInterval(() => {
-        const img = document.getElementById('img-' + uid);
-        if (img) {
-            img.style.display = 'block';
-            img.src = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
-        }
+        const st = jpgStates[uid];
+        if (!st) return;
+        // ถ้ากำลังรอโหลดอยู่ (watchdog ยังนับ) → ข้ามรอบนี้ ไม่ให้รบกวน
+        if (st.loadTimeout) return;
+        jpgLoadCurrent(uid);
     }, 5000);
 }
 
 function stopJpgRefresh(uid) {
+    const st = jpgStates[uid];
+    if (st && st.loadTimeout) clearTimeout(st.loadTimeout);
     if (jpgTimers[uid]) { clearInterval(jpgTimers[uid]); delete jpgTimers[uid]; }
+    delete jpgStates[uid];
 }
 
 /* =========================================================
@@ -1378,7 +1494,7 @@ window.toggleSidebarSection = function (sectionId) {
 };
 
 /* =========================================================
-   ★★★ ฟังก์ชันยุบ/เปิด Sidebar ★★★
+   Sidebar collapse
    ========================================================= */
 let sidebarCollapsed = false;
 
@@ -1389,27 +1505,17 @@ window.toggleSidebar = function () {
     sidebarCollapsed = !sidebarCollapsed;
 
     if (sidebarCollapsed) {
-        // ยุบซ่อน
         sidebar.classList.add('collapsed');
-        // รอให้ sidebar เลื่อนออกก่อน แล้วโชว์ปุ่ม
         setTimeout(() => {
             revealBtn.classList.add('show');
         }, 200);
     } else {
-        // เปิดกลับ
         revealBtn.classList.remove('show');
         setTimeout(() => {
             sidebar.classList.remove('collapsed');
         }, 100);
     }
 };
-
-/* กด Esc เพื่อปิด sidebar (ถ้ายังเปิดอยู่) */
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !sidebarCollapsed) {
-        // ไม่ทำอะไร — ให้กดปุ่มเท่านั้น เพื่อไม่ให้ user พลาด
-    }
-});
 
 /* =========================================================
    วันที่-เวลาไทย
@@ -1445,31 +1551,17 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
 <script>
 /**
  * nst-water-stations.js
- * ดึงสถานีวัดระดับน้ำ "เฉพาะจังหวัดนครศรีธรรมราช" ออกมาเป็นชุดข้อมูลสำหรับนำไปใส่แผนที่อื่น
- *
- * แหล่งข้อมูล (เหมือนกับที่ใช้ใน index.html):
- *   1) Thai Water  https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load
- *   2) สสน. (HII)  https://floodwatch.cloud/api/external/water-stations   (เฉพาะ agency = "สสน.")
- * สถานีที่ซ้ำกัน (รหัสหรือพิกัดเดียวกัน) จะเก็บของ Thai Water เพียงอันเดียว
- *
- * วิธีใช้
- *   Browser : (โหลดไฟล์นี้ด้วยแท็ก script)
- *             NSTWater.load().then(stations => { NSTWater.table(stations); });
- *   Leaflet : NSTWater.load().then(st => NSTWater.addToLeaflet(map, st));
- *   Node 18+: node nst-water-stations.js            -> พิมพ์ตารางรายชื่อ
- *             node nst-water-stations.js --geojson > nst.geojson
- *             node nst-water-stations.js --json    > nst.json
+ * ดึงสถานีวัดระดับน้ำ "เฉพาะจังหวัดนครศรีธรรมราช"
  */
 (function (root) {
     'use strict';
 
     const CONFIG = {
         province: 'นครศรีธรรมราช',
-        // กรอบพิกัดคร่าว ๆ ของจังหวัด ใช้เป็นตัวสำรองเฉพาะสถานีที่ API ไม่ระบุจังหวัด
         bbox: { south: 7.85, north: 9.10, west: 99.30, east: 100.45 },
         thaiwaterUrl: 'https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load',
         hiiUrl: 'https://floodwatch.cloud/api/external/water-stations',
-        proxy: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u) // ใช้เมื่อติด CORS
+        proxy: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u)
     };
 
     const SITUATION = {
@@ -1500,7 +1592,6 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
         return lat >= b.south && lat <= b.north && lng >= b.west && lng <= b.east;
     }
 
-    // แปลง record ของ API ให้เป็นโครงสร้างแบน ๆ ใช้ง่าย
     function normalize(st, source) {
         const lat = parseFloat(st.station?.tele_station_lat);
         const lng = parseFloat(st.station?.tele_station_long);
@@ -1512,7 +1603,7 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
             if (province !== CONFIG.province) return null;
             matchedBy = 'province';
         } else if (inBBox(lat, lng)) {
-            matchedBy = 'bbox'; // API ไม่ระบุจังหวัด แต่พิกัดอยู่ในกรอบจังหวัด
+            matchedBy = 'bbox';
         } else {
             return null;
         }
@@ -1535,7 +1626,7 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
             province: province || CONFIG.province,
             agency: st.agency?.agency_shortname?.th || '-',
             river: st.river_name || '',
-            water_level_msl: wl,            // ม.รทก.
+            water_level_msl: wl,
             water_level_prev: prev,
             trend,
             bank_diff: st.diff_wl_bank != null ? parseFloat(st.diff_wl_bank) : null,
@@ -1545,7 +1636,7 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
             situation: sit.label,
             color: sit.color,
             datetime: st.waterlevel_datetime || '',
-            source,                         // 'thaiwater' | 'hii'
+            source,
             matchedBy
         };
     }
@@ -1557,7 +1648,6 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
         return k;
     };
 
-    // รวมสองแหล่ง ตัดซ้ำ (Thai Water มาก่อน)
     function buildList(thaiwaterPayload, hiiPayload) {
         const out = [];
         const seen = new Set();
@@ -1598,23 +1688,6 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
         };
     }
 
-    // พิมพ์รายชื่อว่ามีที่ไหนบ้าง จัดกลุ่มตามอำเภอ
-    function table(stations) {
-        const byAmphoe = {};
-        stations.forEach(s => (byAmphoe[s.amphoe || '(ไม่ระบุอำเภอ)'] ||= []).push(s));
-        console.log('สถานีวัดระดับน้ำ จ.' + CONFIG.province + ' ทั้งหมด ' + stations.length + ' สถานี');
-        Object.keys(byAmphoe).forEach(a => {
-            console.log('\nอ.' + a + ' (' + byAmphoe[a].length + ')');
-            console.table(byAmphoe[a].map(s => ({
-                สถานี: s.name, แม่น้ำ: s.river, หน่วยงาน: s.agency,
-                'ระดับน้ำ(ม.รทก.)': s.water_level_msl, แนวโน้ม: s.trend,
-                สถานการณ์: s.situation, lat: s.lat, lng: s.lng, เวลา: s.datetime
-            })));
-        });
-        return byAmphoe;
-    }
-
-    // ---------- การ์ด popup + หมุด (หน้าตาเดียวกับหน้า Thai Water เดิม) ----------
     const CARD_CSS = `
 .nstw-dot{background:transparent;border:none}
 .nstw-dot-inner{width:100%;height:100%;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.45);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
@@ -1687,7 +1760,6 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
 </div>`;
     }
 
-    // วางหมุดบนแผนที่ Leaflet ของคุณ (ต้องโหลด Leaflet ก่อน; การ์ดใช้ไอคอนของ Font Awesome ถ้ามี)
     function addToLeaflet(map, stations, opts) {
         const L = root.L;
         if (!L) throw new Error('ไม่พบ Leaflet (L)');
@@ -1708,7 +1780,6 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
         return group;
     }
 
-    // ดาวน์โหลดไฟล์ (เฉพาะ browser)
     function download(filename, text, type) {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([text], { type: type || 'application/json' }));
@@ -1717,21 +1788,12 @@ console.log(`✅ Sidebar toggle พร้อมใช้งาน (กด ◀ �
     }
 
     const api = {
-        CONFIG, load, buildList, normalize, toGeoJSON, table, addToLeaflet, popupHTML,
+        CONFIG, load, buildList, normalize, toGeoJSON, addToLeaflet, popupHTML,
         downloadGeoJSON: st => download('nst-water-stations.geojson', JSON.stringify(toGeoJSON(st), null, 2)),
         downloadJSON: st => download('nst-water-stations.json', JSON.stringify(st, null, 2))
     };
     root.NSTWater = api;
     if (typeof module !== 'undefined' && module.exports) module.exports = api;
-
-    // CLI (Node)
-    if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
-        load().then(st => {
-            if (process.argv.includes('--geojson')) console.log(JSON.stringify(toGeoJSON(st), null, 2));
-            else if (process.argv.includes('--json')) console.log(JSON.stringify(st, null, 2));
-            else table(st);
-        }).catch(e => { console.error(e.message); process.exit(1); });
-    }
 })(typeof window !== 'undefined' ? window : globalThis);
 
 
