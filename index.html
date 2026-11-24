@@ -1069,7 +1069,8 @@ Object.values(GROUPS).forEach(g => g.layer.addTo(map));
 /* =========================================================
    YOUTUBE AUTO FETCH
    ========================================================= */
-const YT_CACHE = {}; // เก็บ cache Video ID ป้องกันการยิง Proxy บ่อยเกินไป
+// ★ ใส่ API Key ของคุณที่นี่
+const YOUTUBE_API_KEY = 'AIzaSyBQ3I6Ot4IjshNAABVWqV97QQvbAyvL8Ko'; 
 
 async function startYouTube(uid, handle) {
     const loader = document.getElementById('loader-' + uid);
@@ -1082,7 +1083,7 @@ async function startYouTube(uid, handle) {
     if (errBox) errBox.style.display = 'none';
     if (loader) loader.style.display = 'flex';
 
-    // ถ้ามี Cache ที่อายุไม่เกิน 5 นาที ให้ใช้เลย
+    // ตรวจสอบ Cache ก่อน (หากมีและอายุไม่เกิน 5 นาทีให้ใช้เลย เพื่อประหยัด API Quota)
     if (YT_CACHE[handle] && (Date.now() - YT_CACHE[handle].time < 5 * 60 * 1000)) {
         iframe.src = `https://www.youtube.com/embed/${YT_CACHE[handle].id}?autoplay=1&mute=1`;
         iframe.style.display = 'block';
@@ -1090,41 +1091,57 @@ async function startYouTube(uid, handle) {
         return;
     }
 
-    // ใช้ Proxy ที่มีอยู่เพื่อดึงหน้า /live
-    const targetUrl = `https://www.youtube.com/${handle}/live`;
-    const proxyUrl = window.CCTV_PROXY + encodeURIComponent(targetUrl);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout 10 วิ
-
     try {
-        const res = await fetch(proxyUrl, { signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (!res.ok) throw new Error('Proxy error');
-        const html = await res.text();
-
-        // ดึง Video ID จาก Canonical Link
-        const match = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
+        // ขั้นตอนที่ 1: ค้นหา Channel ID จาก Handle (เช่น @pakorn_hs8tv)
+        const searchUrl = `https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${handle}&key=${YOUTUBE_API_KEY}`;
+        const searchRes = await fetch(searchUrl);
         
-        if (match && match[1]) {
-            const videoId = match[1];
-            YT_CACHE[handle] = { id: videoId, time: Date.now() }; // บันทึก Cache
+        if (!searchRes.ok) {
+            const errData = await searchRes.json();
+            throw new Error(errData.error?.message || 'เกิดข้อผิดพลาดในการเรียก YouTube API');
+        }
+        
+        const searchData = await searchRes.json();
+        
+        if (!searchData.items || searchData.items.length === 0) {
+            throw new Error('ไม่พบช่อง YouTube นี้');
+        }
+        const channelId = searchData.items[0].id;
+
+        // ขั้นตอนที่ 2: ค้นหา Video ID ของไลฟ์สตรีมที่กำลังเปิดอยู่ ณ ขณะนี้
+        const liveUrl = `https://www.googleapis.com/youtube/v3/search?part=id&channelId=${channelId}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`;
+        const liveRes = await fetch(liveUrl);
+        
+        if (!liveRes.ok) {
+            const errData = await liveRes.json();
+            throw new Error(errData.error?.message || 'เกิดข้อผิดพลาดในการค้นหาไลฟ์สตรีม');
+        }
+        
+        const liveData = await liveRes.json();
+
+        if (liveData.items && liveData.items.length > 0) {
+            const videoId = liveData.items[0].id.videoId;
             
+            // บันทึก Cache
+            YT_CACHE[handle] = { id: videoId, time: Date.now() }; 
+
             iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
             iframe.onload = () => {
                 if (loader) loader.style.display = 'none';
                 iframe.style.display = 'block';
             };
         } else {
-            throw new Error('ไม่พบการถ่ายทอดสดในขณะนี้');
+            throw new Error('ไม่พบการถ่ายทอดสดในขณะนี้ (ช่องอาจจะยังไม่เริ่มไลฟ์)');
         }
     } catch (error) {
-        clearTimeout(timeoutId);
+        console.error('YouTube API Error:', error);
         if (loader) loader.style.display = 'none';
         if (errBox) {
             errBox.style.display = 'flex';
             const msgDiv = document.getElementById('error-msg-' + uid);
-            if (msgDiv) msgDiv.innerHTML = error.name === 'AbortError' ? 'หมดเวลาเชื่อมต่อ YouTube' : 'ไม่พบการถ่ายทอดสดในขณะนี้';
+            if (msgDiv) {
+                msgDiv.innerHTML = error.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ YouTube';
+            }
         }
     }
 }
