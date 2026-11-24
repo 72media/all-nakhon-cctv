@@ -561,9 +561,10 @@ CAMERAS.push({
     color: '#00b4d8', icon: 'fa-water'
 });
 
+// ★★★ อัปเดตช่อง YouTube ให้ดึงวิดีโออัตโนมัติ ★★★
 CAMERAS.push({
     name: "[YouTube] ตลาดร่อนพิบูลย์", lat: 8.184038, lng: 99.850916,
-    type: 'youtube', videoId: "c8oR_3Edeks",
+    type: 'youtube', channelHandle: "@pakorn_hs8tv", // เปลี่ยนจาก videoId เป็น channelHandle
     group: 'youtube', groupName: 'YouTube',
     color: '#e53935', icon: 'fa-youtube'
 });
@@ -971,9 +972,16 @@ function buildMediaHTML(cam) {
         </div>`;
     }
     if (cam.type === 'youtube') {
+        // ★★★ อัปเดต UI สำหรับ YouTube ให้มี Loader และ Error Box ★★★
         return `<div class="pp-media" id="media-${uid}">
             <span class="badge-type">YouTube</span>
-            <iframe src="https://www.youtube.com/embed/${cam.videoId}?autoplay=1&mute=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div class="loader" id="loader-${uid}"><div class="spinner"></div><div>กำลังเชื่อมต่อ YouTube...</div></div>
+            <iframe id="yt-iframe-${uid}" src="" allow="autoplay; encrypted-media" allowfullscreen style="display:none;"></iframe>
+            <div class="error-box" id="error-${uid}" style="display:none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div id="error-msg-${uid}">ไม่พบการถ่ายทอดสดในขณะนี้</div>
+                <a class="fixbtn" href="https://www.youtube.com/${cam.channelHandle}/live" target="_blank">เปิดใน YouTube</a>
+            </div>
         </div>`;
     }
     if (cam.type === 'iframe') {
@@ -1043,12 +1051,14 @@ CAMERAS.forEach((cam, i) => {
     marker.on('popupopen', () => {
         if (cam.type === 'hls') startHLS(cam._uid, cam.url);
         else if (cam.type === 'jpg') startJpgRefresh(cam._uid, cam.url);
+        else if (cam.type === 'youtube') startYouTube(cam._uid, cam.channelHandle); // ★★★ เรียกใช้ฟังก์ชันใหม่
         else if (cam.type === 'iframe' && /nstcctv\.nakhoncity\.org/.test(cam.url || '')) startWhep(cam._uid, cam.url, false);
     });
     marker.on('popupclose', () => {
         stopHLS(cam._uid);
         stopJpgRefresh(cam._uid);
         stopWhep(cam._uid);
+        // ไม่ต้องทำอะไรกับ YouTube เพราะ iframe จะถูกทำลายเมื่อปิด Popup เอง
     });
     GROUPS[cam.group].camList.push(i);
     markerIndex.push({ marker, cam, groupKey: cam.group, idx: i });
@@ -1057,8 +1067,70 @@ CAMERAS.forEach((cam, i) => {
 Object.values(GROUPS).forEach(g => g.layer.addTo(map));
 
 /* =========================================================
+   YOUTUBE AUTO FETCH
+   ========================================================= */
+const YT_CACHE = {}; // เก็บ cache Video ID ป้องกันการยิง Proxy บ่อยเกินไป
+
+async function startYouTube(uid, handle) {
+    const loader = document.getElementById('loader-' + uid);
+    const iframe = document.getElementById('yt-iframe-' + uid);
+    const errBox = document.getElementById('error-' + uid);
+    if (!iframe) return;
+
+    // รีเซ็ต UI
+    iframe.style.display = 'none';
+    if (errBox) errBox.style.display = 'none';
+    if (loader) loader.style.display = 'flex';
+
+    // ถ้ามี Cache ที่อายุไม่เกิน 5 นาที ให้ใช้เลย
+    if (YT_CACHE[handle] && (Date.now() - YT_CACHE[handle].time < 5 * 60 * 1000)) {
+        iframe.src = `https://www.youtube.com/embed/${YT_CACHE[handle].id}?autoplay=1&mute=1`;
+        iframe.style.display = 'block';
+        if (loader) loader.style.display = 'none';
+        return;
+    }
+
+    // ใช้ Proxy ที่มีอยู่เพื่อดึงหน้า /live
+    const targetUrl = `https://www.youtube.com/${handle}/live`;
+    const proxyUrl = window.CCTV_PROXY + encodeURIComponent(targetUrl);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout 10 วิ
+
+    try {
+        const res = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('Proxy error');
+        const html = await res.text();
+
+        // ดึง Video ID จาก Canonical Link
+        const match = html.match(/<link\s+rel="canonical"\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)"/);
+        
+        if (match && match[1]) {
+            const videoId = match[1];
+            YT_CACHE[handle] = { id: videoId, time: Date.now() }; // บันทึก Cache
+            
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+            iframe.onload = () => {
+                if (loader) loader.style.display = 'none';
+                iframe.style.display = 'block';
+            };
+        } else {
+            throw new Error('ไม่พบการถ่ายทอดสดในขณะนี้');
+        }
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (loader) loader.style.display = 'none';
+        if (errBox) {
+            errBox.style.display = 'flex';
+            const msgDiv = document.getElementById('error-msg-' + uid);
+            if (msgDiv) msgDiv.innerHTML = error.name === 'AbortError' ? 'หมดเวลาเชื่อมต่อ YouTube' : 'ไม่พบการถ่ายทอดสดในขณะนี้';
+        }
+    }
+}
+
+/* =========================================================
    WHEP (MediaMTX WebRTC) — เทศบาลนคร
-   ถ้าเชื่อมต่อไม่ได้ (CORS/ICE/หมดเวลา) จะแสดงปุ่มเปิดแท็บใหม่แทน
    ========================================================= */
 const WHEP = {};   // uid -> { reader, timer, baseUrl, hd }
 function loadWhepLib(baseUrl) {
@@ -1371,409 +1443,17 @@ window.openLightbox = function (uid) {
 
 window.closeLightbox = function () {
     const lb = document.getElementById('lightbox');
-    if (!lb.classList.contains('show')) return;
+    const lbImg = document.getElementById('lightbox-img');
     lb.classList.remove('show');
+    setTimeout(() => { lbImg.src = ''; }, 300);
     document.body.style.overflow = '';
-    setTimeout(() => {
-        const lbImg = document.getElementById('lightbox-img');
-        if (lbImg) lbImg.src = '';
-    }, 300);
 };
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'Escape') {
+        closeLightbox();
+    }
 });
-
-/* =========================================================
-   ★★★ DOWNLOAD JPG ★★★
-   ========================================================= */
-window.downloadJpg = async function (uid) {
-    const img = document.getElementById('img-' + uid);
-    if (!img || !img.src || img.naturalWidth === 0) return;
-    const btn = document.getElementById('btn-dl-' + uid);
-    if (btn) {
-        btn.classList.add('downloading');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    }
-    try {
-        const res = await fetch(img.src, { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const camName = (img.alt || 'cctv').replace(/[^\wก-๙\-]/g, '_').slice(0, 40);
-        const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        a.href = url;
-        a.download = `${camName}_${ts}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 2000);
-        if (btn) {
-            btn.classList.remove('downloading');
-            btn.classList.add('success');
-            btn.innerHTML = '<i class="fas fa-check"></i>';
-            setTimeout(() => {
-                btn.classList.remove('success');
-                btn.innerHTML = '<i class="fas fa-download"></i>';
-            }, 1500);
-        }
-    } catch (e) {
-        console.error('Download failed:', e);
-        if (btn) {
-            btn.classList.remove('downloading');
-            btn.classList.add('failed');
-            btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-            setTimeout(() => {
-                btn.classList.remove('failed');
-                btn.innerHTML = '<i class="fas fa-download"></i>';
-            }, 1500);
-        }
-    }
-};
-
-/* =========================================================
-   UI
-   ========================================================= */
-function renderLegend() {
-    document.getElementById('legend-list').innerHTML = Object.values(GROUPS).map(g => `
-        <div class="legend-item ${g.active ? '' : 'off'}" onclick="toggleGroup('${g.config.key}')">
-            <span class="legend-dot" style="background:${g.config.color};"></span>
-            <span>${g.config.name}</span>
-            <span class="cnt">${g.camList.length}</span>
-        </div>
-    `).join('');
-}
-
-function renderList() {
-    const q = document.getElementById('search').value.toLowerCase().trim();
-    const items = markerIndex.filter(m => GROUPS[m.groupKey].active && (!q || m.cam.name.toLowerCase().includes(q)));
-    document.getElementById('camera-list').innerHTML = items.slice(0, 400).map(m => `
-        <div class="cam-row" data-idx="${m.idx}" onclick="focusCam(${m.idx})">
-            <div class="name">${m.cam.name}</div>
-            <div class="coords">${m.cam.lat.toFixed(6)}, ${m.cam.lng.toFixed(6)}</div>
-        </div>
-    `).join('');
-    const inlineStat = document.getElementById('stat-total-inline');
-    if (inlineStat) inlineStat.textContent = items.length;
-}
-
-window.focusCam = function (idx) {
-    const m = markerIndex.find(x => x.idx === idx);
-    if (!m) return;
-    map.flyTo([m.cam.lat, m.cam.lng], 18, { duration: 1.0 });
-    setTimeout(() => m.marker.openPopup(), 700);
-    document.querySelectorAll('.cam-row').forEach(el => el.classList.remove('active'));
-    document.querySelector(`.cam-row[data-idx="${idx}"]`)?.classList.add('active');
-};
-
-window.toggleGroup = function (key) {
-    const g = GROUPS[key];
-    g.active = !g.active;
-    if (g.active) map.addLayer(g.layer);
-    else map.removeLayer(g.layer);
-    renderLegend();
-    renderList();
-};
-
-window.fitAll = function () { map.flyToBounds(radarBounds, { padding: [30, 30], duration: 1.2 }); };
-
-window.toggleRadar = function () {
-    const btn = document.getElementById('tg-radar');
-    const controls = document.getElementById('radar-controls');
-    if (radarVisible) {
-        map.removeLayer(radarLayer); btn.classList.remove('active');
-        if (controls) controls.style.display = 'none';
-    } else {
-        radarLayer.addTo(map); btn.classList.add('active');
-        if (controls) controls.style.display = 'flex';
-    }
-    radarVisible = !radarVisible;
-};
-
-window.toggleDistrictLayer = function () {
-    const btn = document.getElementById('tg-districts');
-    if (districtsVisible) { map.removeLayer(districtLayerGroup); btn.classList.remove('active'); }
-    else { districtLayerGroup.addTo(map); btn.classList.add('active'); }
-    districtsVisible = !districtsVisible;
-};
-
-window.onRadarOpacityChange = function (val) {
-    radarOpacity = val / 100;
-    radarLayer.setOpacity(radarOpacity);
-    document.getElementById('radar-opacity-val').textContent = val + '%';
-};
-
-window.toggleSidebarSection = function (sectionId) {
-    const s = document.getElementById(sectionId);
-    if (s) s.classList.toggle('collapsed');
-};
-
-let sidebarCollapsed = false;
-window.toggleSidebar = function () {
-    const sidebar = document.getElementById('testSidebar');
-    const revealBtn = document.getElementById('sidebarRevealBtn');
-    sidebarCollapsed = !sidebarCollapsed;
-    if (sidebarCollapsed) {
-        sidebar.classList.add('collapsed');
-        setTimeout(() => revealBtn.classList.add('show'), 200);
-    } else {
-        revealBtn.classList.remove('show');
-        setTimeout(() => sidebar.classList.remove('collapsed'), 100);
-    }
-};
-
-function updateThaiDateTime() {
-    const now = new Date();
-    const thaiDate = now.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    const thaiTime = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) + ' น.';
-    const dateEl = document.getElementById('thai-date');
-    const timeEl = document.getElementById('thai-time');
-    if (dateEl) dateEl.textContent = thaiDate;
-    if (timeEl) timeEl.textContent = thaiTime;
-}
-setInterval(updateThaiDateTime, 1000);
-updateThaiDateTime();
-
-renderLegend();
-renderList();
-loadDistrictBoundaries();
-
-console.log(`✅ โหลดกล้องทั้งหมด ${CAMERAS.length} ตัว`);
-console.log(`✅ หน้าเว็บรันบน: ${PAGE_IS_HTTPS ? 'HTTPS' : 'HTTP'}`);
-console.log(`✅ Cloudflare Worker: ${HAS_CUSTOM_PROXY ? 'พร้อมใช้งาน' : '⚠️ ยังไม่ได้ตั้งค่า'}`);
-console.log(`✅ ฟีเจอร์: Lightbox (คลิกภาพ) · ดาวน์โหลด (⬇) · Response time · รีเฟรช 10 วิ`);
-</script>
-<script>
-/**
- * nst-water-stations.js — สถานีวัดระดับน้ำ จ.นครศรีธรรมราช
- */
-(function (root) {
-    'use strict';
-    const CONFIG = {
-        province: 'นครศรีธรรมราช',
-        bbox: { south: 7.85, north: 9.10, west: 99.30, east: 100.45 },
-        thaiwaterUrl: 'https://api-v3.thaiwater.net/api/v1/thaiwater30/public/waterlevel_load',
-        hiiUrl: 'https://floodwatch.cloud/api/external/water-stations',
-        proxy: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u)
-    };
-    const SITUATION = {
-        1: { color: '#a35709', label: 'น้ำน้อยวิกฤต' },
-        2: { color: '#f39c12', label: 'น้ำน้อย' },
-        3: { color: '#2ea043', label: 'ปกติ' },
-        4: { color: '#1e6fd9', label: 'น้ำมาก' },
-        5: { color: '#e53935', label: 'ล้นตลิ่ง' }
-    };
-    const UNKNOWN = { color: '#8b949e', label: 'ไม่มีข้อมูลสถานะ' };
-
-    async function fetchJson(url) {
-        try {
-            const r = await fetch(url);
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            return await r.json();
-        } catch (e) {
-            const r2 = await fetch(CONFIG.proxy(url));
-            if (!r2.ok) throw new Error('HTTP ' + r2.status + ' (proxy)');
-            return r2.json();
-        }
-    }
-    const clean = s => String(s || '').replace(/^จ\.\s*/, '').replace(/^จังหวัด\s*/, '').trim();
-    const inBBox = (lat, lng) => {
-        const b = CONFIG.bbox;
-        return lat >= b.south && lat <= b.north && lng >= b.west && lng <= b.east;
-    };
-
-    function normalize(st, source) {
-        const lat = parseFloat(st.station?.tele_station_lat);
-        const lng = parseFloat(st.station?.tele_station_long);
-        if (isNaN(lat) || isNaN(lng)) return null;
-        const province = clean(st.geocode?.province_name?.th);
-        let matchedBy;
-        if (province) { if (province !== CONFIG.province) return null; matchedBy = 'province'; }
-        else if (inBBox(lat, lng)) matchedBy = 'bbox';
-        else return null;
-        const wl = st.waterlevel_msl != null ? parseFloat(st.waterlevel_msl) : null;
-        const prev = st.waterlevel_msl_previous != null ? parseFloat(st.waterlevel_msl_previous) : null;
-        let trend = 'ทรงตัว';
-        if (wl != null && prev != null) {
-            const d = wl - prev;
-            if (d > 0.01) trend = 'ขึ้น'; else if (d < -0.01) trend = 'ลด';
-        }
-        const sit = SITUATION[st.situation_level] || UNKNOWN;
-        return {
-            id: st.station?.tele_station_oldcode || null,
-            name: st.station?.tele_station_name?.th || st.station?.tele_station_name?.en || st.station?.tele_station_oldcode || '-',
-            name_en: st.station?.tele_station_name?.en || '',
-            lat, lng,
-            amphoe: st.geocode?.amphoe_name?.th || '',
-            province: province || CONFIG.province,
-            agency: st.agency?.agency_shortname?.th || '-',
-            river: st.river_name || '',
-            water_level_msl: wl, water_level_prev: prev, trend,
-            bank_diff: st.diff_wl_bank != null ? parseFloat(st.diff_wl_bank) : null,
-            bank_text: st.diff_wl_bank_text || '',
-            storage_percent: st.storage_percent != null ? st.storage_percent : null,
-            situation_level: st.situation_level ?? null,
-            situation: sit.label, color: sit.color,
-            datetime: st.waterlevel_datetime || '',
-            source, matchedBy
-        };
-    }
-    const keysOf = s => {
-        const k = [];
-        if (s.id) k.push('code:' + String(s.id).trim());
-        k.push('pos:' + s.lat.toFixed(4) + ',' + s.lng.toFixed(4));
-        return k;
-    };
-    function buildList(tw, hii) {
-        const out = [], seen = new Set();
-        const add = (rows, source, agencyOnly) => {
-            (rows || []).forEach(raw => {
-                if (agencyOnly && (raw.agency?.agency_shortname?.th || '').trim() !== agencyOnly) return;
-                const s = normalize(raw, source);
-                if (!s) return;
-                const ks = keysOf(s);
-                if (ks.some(k => seen.has(k))) return;
-                ks.forEach(k => seen.add(k));
-                out.push(s);
-            });
-        };
-        add(tw?.waterlevel_data?.data, 'thaiwater');
-        add(hii?.waterlevel_data?.data, 'hii', 'สสน.');
-        return out.sort((a, b) => a.amphoe.localeCompare(b.amphoe, 'th') || a.name.localeCompare(b.name, 'th'));
-    }
-    async function load() {
-        const [tw, hii] = await Promise.allSettled([fetchJson(CONFIG.thaiwaterUrl), fetchJson(CONFIG.hiiUrl)]);
-        if (tw.status === 'rejected') console.warn('โหลด Thai Water ไม่สำเร็จ:', tw.reason);
-        if (hii.status === 'rejected') console.warn('โหลด สสน. ไม่สำเร็จ:', hii.reason);
-        if (tw.status === 'rejected' && hii.status === 'rejected') throw new Error('โหลดข้อมูลไม่สำเร็จทั้งสองแหล่ง');
-        return buildList(tw.value, hii.value);
-    }
-
-    const CARD_CSS = `
-.nstw-dot{background:transparent;border:none}
-.nstw-dot-inner{width:100%;height:100%;border-radius:50%;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.45);cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
-.nstw-dot:hover .nstw-dot-inner{transform:scale(1.4);box-shadow:0 3px 10px rgba(0,0,0,.6)}
-.nstw-popup .leaflet-popup-content-wrapper{padding:0;overflow:hidden;border-radius:18px;box-shadow:0 12px 30px rgba(0,0,0,.38);width:240px!important;max-width:240px!important;min-width:240px!important;background:#fff;color:#181818}
-.nstw-popup .leaflet-popup-content{margin:0!important;width:240px!important;max-width:240px!important;min-width:240px!important}
-.nstw-popup .leaflet-popup-tip{background:#fff}
-.nstw-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;background:#f5f6f8;border-radius:14px;padding:10px 12px 9px}
-.nstw-hero-label{display:flex;align-items:center;gap:5px;font-size:.64rem;font-weight:800;color:#6b7280;letter-spacing:.2px;text-transform:uppercase}
-.nstw-hero-num{font-size:2rem;font-weight:900;color:#181818;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
-.nstw-hero-unit{font-size:.68rem;font-weight:800;color:#9aa0a6;margin-left:3px}
-.nstw-mini{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border-radius:10px;background:#f5f6f8;margin-top:6px}
-.nstw-mini-label{display:flex;align-items:center;gap:5px;font-size:.63rem;font-weight:800;color:#6b7280}
-.nstw-mini-label i{font-size:.58rem;width:11px;text-align:center;opacity:.85}
-.nstw-mini-val{font-size:.92rem;font-weight:800;color:#181818;font-variant-numeric:tabular-nums}
-.nstw-mini-unit{font-size:.58rem;font-weight:700;color:#9aa0a6;margin-left:2px}`;
-
-    function injectStyles() {
-        if (typeof document === 'undefined' || document.getElementById('nstw-style')) return;
-        const el = document.createElement('style');
-        el.id = 'nstw-style';
-        el.textContent = CARD_CSS;
-        document.head.appendChild(el);
-    }
-    const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-    function popupHTML(s) {
-        const c = s.color;
-        const trendIcon = s.trend === 'ขึ้น' ? '🔺' : s.trend === 'ลด' ? '🔻' : '🟢';
-        const overflow = /ล้นตลิ่ง/.test(s.bank_text);
-        const bankColor = overflow ? '#e53935' : '#2e7d32';
-        const loc = esc(s.amphoe) + (s.amphoe && s.province ? ', ' : '') + esc(s.province);
-        return `
-<div style="width:100%;font-family:inherit;">
-  <div style="background:linear-gradient(135deg,${c},${c}cc 60%,${c}90);color:#fff;padding:10px 12px;display:flex;align-items:center;gap:8px;">
-    <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <i class="fas fa-water" style="font-size:.7rem;"></i>
-    </div>
-    <div style="min-width:0;">
-      <div style="font-size:.78rem;font-weight:800;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${esc(s.name)}</div>
-      <div style="font-size:.6rem;font-weight:700;opacity:.9;margin-top:1px;">${esc(s.agency)} · ${loc}</div>
-    </div>
-  </div>
-  <div style="padding:10px 11px 11px;">
-    <div class="nstw-hero">
-      <div>
-        <div class="nstw-hero-label"><i class="fas fa-ruler-vertical"></i> ระดับน้ำ</div>
-        <div><span class="nstw-hero-num">${s.water_level_msl != null ? s.water_level_msl : '-'}</span><span class="nstw-hero-unit">ม.รทก.</span></div>
-      </div>
-      <span style="background:${c};color:#fff;font-size:.62rem;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;">${esc(s.situation)}</span>
-    </div>
-    <div class="nstw-mini">
-      <span class="nstw-mini-label">${trendIcon} แนวโน้ม${esc(s.trend)}</span>
-      <span><span class="nstw-mini-val" style="font-size:.8rem;">${s.water_level_prev != null ? s.water_level_prev : '-'}</span><span class="nstw-mini-unit">ม. (ค่าก่อนหน้า)</span></span>
-    </div>
-    ${s.storage_percent != null ? `
-    <div class="nstw-mini">
-      <span class="nstw-mini-label"><i class="fas fa-percent"></i> % ความจุ/ระดับ</span>
-      <span><span class="nstw-mini-val">${esc(s.storage_percent)}</span><span class="nstw-mini-unit">%</span></span>
-    </div>` : ''}
-    <div class="nstw-mini" style="background:${overflow ? '#fdeaea' : '#eaf6ec'};">
-      <span class="nstw-mini-label" style="color:${bankColor};"><i class="fas ${overflow ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> ${esc(s.bank_text || '-')}</span>
-      <span><span class="nstw-mini-val" style="color:${bankColor};">${s.bank_diff != null ? s.bank_diff : '-'}</span><span class="nstw-mini-unit">ม.</span></span>
-    </div>
-    ${s.river ? `<div style="font-size:.6rem;color:#9aa0a6;font-weight:700;margin-top:6px;"><i class="fas fa-water"></i> แม่น้ำ/ลำน้ำ: ${esc(s.river)}</div>` : ''}
-    <div style="font-size:.58rem;color:#9aa0a6;font-weight:700;margin-top:5px;"><i class="far fa-clock"></i> ${esc(s.datetime || '-')} น.</div>
-  </div>
-</div>`;
-    }
-
-    function addToLeaflet(map, stations, opts) {
-        const L = root.L;
-        if (!L) throw new Error('ไม่พบ Leaflet (L)');
-        injectStyles();
-        const size = (opts && opts.size) || 16;
-        const group = L.layerGroup();
-        stations.forEach(s => {
-            const icon = L.divIcon({
-                className: 'nstw-dot',
-                html: '<div class="nstw-dot-inner" style="background:' + s.color + ';"></div>',
-                iconSize: [size, size], iconAnchor: [size / 2, size / 2], popupAnchor: [0, -(size / 2) - 4]
-            });
-            L.marker([s.lat, s.lng], { icon })
-                .bindPopup(popupHTML(s), { minWidth: 250, maxWidth: 250, className: 'nstw-popup' })
-                .addTo(group);
-        });
-        group.addTo(map);
-        return group;
-    }
-
-    const api = { CONFIG, load, buildList, normalize, addToLeaflet, popupHTML };
-    root.NSTWater = api;
-    if (typeof module !== 'undefined' && module.exports) module.exports = api;
-})(typeof window !== 'undefined' ? window : globalThis);
-
-let nstwGroup = null, nstwOn = true, nstwTimer = null;
-
-async function nstwRefresh() {
-    const statusEl = document.getElementById('nstw-status');
-    const cntEl = document.getElementById('nstw-count');
-    try {
-        const stations = await NSTWater.load();
-        if (nstwGroup) map.removeLayer(nstwGroup);
-        nstwGroup = NSTWater.addToLeaflet(map, stations);
-        if (!nstwOn) map.removeLayer(nstwGroup);
-        cntEl.textContent = stations.length;
-        const t = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', hour12: false });
-        statusEl.textContent = stations.length ? 'อัปเดต ' + t + ' น.' : 'ไม่พบสถานีในจังหวัด';
-    } catch (e) {
-        console.warn('โหลดระดับน้ำไม่สำเร็จ', e);
-        statusEl.textContent = 'โหลดข้อมูลระดับน้ำไม่สำเร็จ';
-        cntEl.textContent = '–';
-    }
-}
-
-window.nstwToggle = function () {
-    nstwOn = !nstwOn;
-    document.getElementById('nstw-toggle').classList.toggle('off', !nstwOn);
-    if (!nstwGroup) return;
-    if (nstwOn) nstwGroup.addTo(map); else map.removeLayer(nstwGroup);
-};
-
-nstwRefresh();
-nstwTimer = setInterval(nstwRefresh, 5 * 60 * 1000);
 </script>
 </body>
 </html>
