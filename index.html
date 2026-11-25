@@ -1071,6 +1071,83 @@ CAMERAS.forEach((cam, i) => {
 Object.values(GROUPS).forEach(g => g.layer.addTo(map));
 
 /* =========================================================
+   ★★★ CORE UI FUNCTIONS — เติมส่วนที่หาย ทำให้ปุ่ม Sidebar/แผนที่ทำงาน ★★★
+   ========================================================= */
+let sidebarIsOpen = true;
+function toggleSidebar() {
+    const sidebar = document.getElementById('testSidebar');
+    const reveal = document.getElementById('sidebarRevealBtn');
+    if (!sidebar || !reveal) return;
+    sidebarIsOpen = !sidebarIsOpen;
+    sidebar.classList.toggle('collapsed', !sidebarIsOpen);
+    reveal.classList.toggle('show', !sidebarIsOpen);
+}
+function toggleSidebarSection(id) {
+    const section = document.getElementById(id);
+    if (section) section.classList.toggle('collapsed');
+}
+function renderList() {
+    const list = document.getElementById('camera-list');
+    const search = (document.getElementById('search')?.value || '').trim().toLowerCase();
+    if (!list) return;
+    const filtered = CAMERAS.filter(cam => cam.name.toLowerCase().includes(search) || (cam.groupName || '').toLowerCase().includes(search));
+    const total = document.getElementById('stat-total-inline');
+    if (total) total.textContent = CAMERAS.length;
+    list.innerHTML = filtered.map(cam => `<div class="cam-row" data-cam="${cam._uid}" onclick="focusCamera(${cam._uid})">
+        <div class="name"><i class="fas ${cam.icon}" style="color:${cam.color};margin-right:6px"></i>${cam.name}</div>
+        <div class="coords">${cam.lat.toFixed(5)}, ${cam.lng.toFixed(5)}</div>
+    </div>`).join('') || '<div style="padding:12px;color:#94a3b8;font-size:.75rem">ไม่พบกล้องที่ค้นหา</div>';
+}
+function focusCamera(uid) {
+    const entry = markerIndex.find(x => x.idx === uid);
+    if (!entry) return;
+    map.setView([entry.cam.lat, entry.cam.lng], Math.max(map.getZoom(), 15), { animate: true });
+    entry.marker.openPopup();
+}
+function fitAll() {
+    if (!markerIndex.length) return;
+    const bounds = L.latLngBounds(markerIndex.map(x => [x.cam.lat, x.cam.lng]));
+    map.fitBounds(bounds.pad(0.08), { maxZoom: 13 });
+}
+function toggleRadar() {
+    radarVisible = !radarVisible;
+    if (radarVisible) radarLayer.addTo(map); else map.removeLayer(radarLayer);
+    document.getElementById('tg-radar')?.classList.toggle('active', radarVisible);
+    const ctl = document.getElementById('radar-controls');
+    if (ctl) ctl.style.opacity = radarVisible ? '1' : '.55';
+}
+function onRadarOpacityChange(value) {
+    radarOpacity = Number(value) / 100;
+    radarLayer.setOpacity(radarOpacity);
+    const val = document.getElementById('radar-opacity-val');
+    if (val) val.textContent = `${value}%`;
+}
+function toggleDistrictLayer() {
+    districtsVisible = !districtsVisible;
+    if (districtLayerGroup) {
+        if (districtsVisible) districtLayerGroup.addTo(map); else map.removeLayer(districtLayerGroup);
+    }
+    document.getElementById('tg-districts')?.classList.toggle('active', districtsVisible);
+}
+function nstwToggle() {
+    const status = document.getElementById('nstw-status');
+    const toggle = document.getElementById('nstw-toggle');
+    toggle?.classList.toggle('off');
+    if (status) status.textContent = 'ส่วนแสดงสถานีระดับน้ำยังไม่มีแหล่งข้อมูลเชื่อมต่อในไฟล์นี้';
+}
+function updateThaiClock() {
+    const now = new Date();
+    const dateEl = document.getElementById('thai-date');
+    const timeEl = document.getElementById('thai-time');
+    if (dateEl) dateEl.textContent = now.toLocaleDateString('th-TH', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    if (timeEl) timeEl.textContent = now.toLocaleTimeString('th-TH', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }) + ' น.';
+}
+renderList();
+updateThaiClock();
+setInterval(updateThaiClock, 1000);
+loadDistrictBoundaries();
+
+/* =========================================================
    YOUTUBE AUTO FETCH (Using YouTube Data API v3)
    ========================================================= */
 const YT_CACHE = {}; // เก็บ cache Video ID ป้องกันการยิง API บ่อยเกินไป
