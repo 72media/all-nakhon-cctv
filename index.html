@@ -499,6 +499,11 @@ body { overflow: hidden; background: #0b1120; }
    ============================================================ */
 window.CCTV_PROXY = 'https://cctv-proxy.2ramrome.workers.dev/?url=';
 
+/* ============================================================
+   ★★★ YouTube Data API v3 Config ★★★
+   ============================================================ */
+const YOUTUBE_API_KEY = 'AIzaSyBQ3I6Ot4IjshNAABVWqV97QQvbAyvL8Ko'; 
+
 /* =========================================================
    ข้อมูลกล้องทั้งหมด
    ========================================================= */
@@ -564,7 +569,7 @@ CAMERAS.push({
 // ★★★ อัปเดตช่อง YouTube ให้ดึงวิดีโออัตโนมัติ ★★★
 CAMERAS.push({
     name: "[YouTube] ตลาดร่อนพิบูลย์", lat: 8.184038, lng: 99.850916,
-    type: 'youtube', channelHandle: "@pakorn_hs8tv", // เปลี่ยนจาก videoId เป็น channelHandle
+    type: 'youtube', channelHandle: "@pakorn_hs8tv",
     group: 'youtube', groupName: 'YouTube',
     color: '#e53935', icon: 'fa-youtube'
 });
@@ -1051,14 +1056,13 @@ CAMERAS.forEach((cam, i) => {
     marker.on('popupopen', () => {
         if (cam.type === 'hls') startHLS(cam._uid, cam.url);
         else if (cam.type === 'jpg') startJpgRefresh(cam._uid, cam.url);
-        else if (cam.type === 'youtube') startYouTube(cam._uid, cam.channelHandle); // ★★★ เรียกใช้ฟังก์ชันใหม่
+        else if (cam.type === 'youtube') startYouTube(cam._uid, cam.channelHandle); 
         else if (cam.type === 'iframe' && /nstcctv\.nakhoncity\.org/.test(cam.url || '')) startWhep(cam._uid, cam.url, false);
     });
     marker.on('popupclose', () => {
         stopHLS(cam._uid);
         stopJpgRefresh(cam._uid);
         stopWhep(cam._uid);
-        // ไม่ต้องทำอะไรกับ YouTube เพราะ iframe จะถูกทำลายเมื่อปิด Popup เอง
     });
     GROUPS[cam.group].camList.push(i);
     markerIndex.push({ marker, cam, groupKey: cam.group, idx: i });
@@ -1067,10 +1071,9 @@ CAMERAS.forEach((cam, i) => {
 Object.values(GROUPS).forEach(g => g.layer.addTo(map));
 
 /* =========================================================
-   YOUTUBE AUTO FETCH
+   YOUTUBE AUTO FETCH (Using YouTube Data API v3)
    ========================================================= */
-// ★ ใส่ API Key ของคุณที่นี่
-const YOUTUBE_API_KEY = 'AIzaSyBQ3I6Ot4IjshNAABVWqV97QQvbAyvL8Ko'; 
+const YT_CACHE = {}; // เก็บ cache Video ID ป้องกันการยิง API บ่อยเกินไป
 
 async function startYouTube(uid, handle) {
     const loader = document.getElementById('loader-' + uid);
@@ -1098,7 +1101,7 @@ async function startYouTube(uid, handle) {
         
         if (!searchRes.ok) {
             const errData = await searchRes.json();
-            throw new Error(errData.error?.message || 'เกิดข้อผิดพลาดในการเรียก YouTube API');
+            throw new Error(errData.error?.message || 'เกิดข้อผิดพลาดในการเรียก YouTube API (ค้นหาช่อง)');
         }
         
         const searchData = await searchRes.json();
